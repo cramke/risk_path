@@ -42,15 +42,6 @@ public:
     // circular obstacle
     bool isValid(const ob::State* state) const override
     {
-        return this->clearance(state) > 0.0;
-    }
-
-    // Returns the distance from the given state's position to the
-    // boundary of the circular obstacle.
-    double clearance(const ob::State* state) const override
-    {
-        // We know we're working with a RealVectorStateSpace in this
-        // example, so we downcast state into the specific type.
         const auto* state2D =
             state->as<ob::RealVectorStateSpace::StateType>();
 
@@ -58,9 +49,16 @@ public:
         double x = state2D->values[0];
         double y = state2D->values[1];
 
-        // Distance formula between two points, offset by the circle's
-        // radius
-        return x+y+3;
+        if (x > -0.1 && x < 0.1 && y > -0.1 && y < 0.1)
+        {
+            std::cout << x << std::endl;
+            std::cout << y << std::endl;
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 };
 
