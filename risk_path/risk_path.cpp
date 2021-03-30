@@ -1,185 +1,159 @@
-/*********************************************************************
- * Software License Agreement (BSD License)
- *
- *  Copyright (c) 2010, Rice University
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *   * Neither the name of the Rice University nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************/
-
- /* Author: Ioan Sucan */
-
 #include <ompl/base/SpaceInformation.h>
-#include <ompl/base/spaces/SE3StateSpace.h>
+#include <ompl/base/objectives/PathLengthOptimizationObjective.h>
+#include <ompl/base/objectives/StateCostIntegralObjective.h>
+#include <ompl/base/objectives/MaximizeMinClearanceObjective.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
-#include <ompl/geometric/planners/rrt/RRTConnect.h>
-#include <ompl/geometric/SimpleSetup.h>
+// For ompl::msg::setLogLevel
+#include "ompl/util/Console.h"
 
-#include <ompl/config.h>
-#include <iostream>
+// The supported optimal planners, in alphabetical order
+#include <ompl/geometric/planners/informedtrees/AITstar.h>
+#include <ompl/geometric/planners/informedtrees/BITstar.h>
+#include <ompl/geometric/planners/cforest/CForest.h>
+#include <ompl/geometric/planners/fmt/FMT.h>
+#include <ompl/geometric/planners/fmt/BFMT.h>
+#include <ompl/geometric/planners/prm/PRMstar.h>
+#include <ompl/geometric/planners/rrt/InformedRRTstar.h>
+#include <ompl/geometric/planners/rrt/RRTstar.h>
+#include <ompl/geometric/planners/rrt/SORRTstar.h>
+
+
+// For boost program options
+#include <boost/program_options.hpp>
+// For string comparison (boost::iequals)
+#include <boost/algorithm/string.hpp>
+// For std::make_shared
+#include <memory>
+
+#include <fstream>
+
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
 
-bool isStateValid(const ob::State* state)
+
+class ValidityChecker : public ob::StateValidityChecker
 {
-    // extract the first component of the state and cast it to what we expect
-    const ob::RealVectorStateSpace::StateType* state2D = state->as<ob::RealVectorStateSpace::StateType>();
+public:
+    ValidityChecker(const ob::SpaceInformationPtr& si) :
+        ob::StateValidityChecker(si) {}
 
-    // Extract the robot's (x,y) position from its state
-    double x = state2D->values[0];
-    double y = state2D->values[1];
+    // Returns whether the given state's position overlaps the
+    // circular obstacle
+    bool isValid(const ob::State* state) const override
+    {
+        return this->clearance(state) > 0.0;
+    }
 
-    // return a value that is always true but uses the two variables we define, so we avoid compiler warnings
-    return x != y;
-}
+    // Returns the distance from the given state's position to the
+    // boundary of the circular obstacle.
+    double clearance(const ob::State* state) const override
+    {
+        // We know we're working with a RealVectorStateSpace in this
+        // example, so we downcast state into the specific type.
+        const auto* state2D =
+            state->as<ob::RealVectorStateSpace::StateType>();
 
-void plan()
+        // Extract the robot's (x,y) position from its state
+        double x = state2D->values[0];
+        double y = state2D->values[1];
+
+        // Distance formula between two points, offset by the circle's
+        // radius
+        return x+y+3;
+    }
+};
+
+ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si);
+ob::OptimizationObjectivePtr getBalancedObjective1(const ob::SpaceInformationPtr& si);
+
+void plan(double runTime, const std::string& outputFile)
 {
-    // construct the state space we are planning in
     auto space(std::make_shared<ob::RealVectorStateSpace>(2));
 
-    // set the bounds for the R^3 part of SE(3)
-    ob::RealVectorBounds bounds(2);
-    bounds.setLow(-1);
-    bounds.setHigh(1);
-
-    space->setBounds(bounds);
-
-    // construct an instance of  space information from this state space
+    space->setBounds(-1.0, 1.0);
     auto si(std::make_shared<ob::SpaceInformation>(space));
 
-    // set state validity checking for this space
-    si->setStateValidityChecker(isStateValid);
+    // Set the object used to check which states in the space are valid
+    si->setStateValidityChecker(std::make_shared<ValidityChecker>(si));
 
-    // create a random start state
+    si->setup();
+
     ob::ScopedState<> start(space);
-    start.random();
+    start->as<ob::RealVectorStateSpace::StateType>()->values[0] = -1.0;
+    start->as<ob::RealVectorStateSpace::StateType>()->values[1] = -1.0;
 
-    // create a random goal state
+    // Set our robot's goal state to be the top-right corner of the
+    // environment, or (1,1).
     ob::ScopedState<> goal(space);
-    goal.random();
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[0] = 1.0;
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[1] = 1.0;
 
-    // create a problem instance
+    // Create a problem instance
     auto pdef(std::make_shared<ob::ProblemDefinition>(si));
 
-    // set the start and goal states
+    // Set the start and goal states
     pdef->setStartAndGoalStates(start, goal);
 
-    // create a planner for the defined space
-    auto planner(std::make_shared<og::RRTConnect>(si));
+    // Create the optimization objective specified by our command-line argument.
+    // This helper function is simply a switch statement.
+    pdef->setOptimizationObjective(getPathLengthObjective(si));
 
-    // set the problem we are trying to solve for the planner
-    planner->setProblemDefinition(pdef);
+    // Construct the optimal planner specified by our command line argument.
+    // This helper function is simply a switch statement.
+    ob::PlannerPtr optimizingPlanner = std::make_shared<og::RRTstar>(si);
 
-    // perform setup steps for the planner
-    planner->setup();
+    // Set the problem instance for our planner to solve
+    optimizingPlanner->setProblemDefinition(pdef);
+    optimizingPlanner->setup();
 
-
-    // print the settings for this space
-    si->printSettings(std::cout);
-
-    // print the problem settings
-    pdef->print(std::cout);
-
-    // attempt to solve the problem within one second of planning time
-    ob::PlannerStatus solved = planner->ob::Planner::solve(1.0);
+    // attempt to solve the planning problem in the given runtime
+    ob::PlannerStatus solved = optimizingPlanner->solve(runTime);
 
     if (solved)
     {
-        // get the goal representation from the problem definition (not the same as the goal state)
-        // and inquire about the found path
-        ob::PathPtr path = pdef->getSolutionPath();
-        std::cout << "Found solution:" << std::endl;
+        // Output the length of the path found
+        std::cout
+            << optimizingPlanner->getName()
+            << " found a solution of length "
+            << pdef->getSolutionPath()->length()
+            << " with an optimization objective value of "
+            << pdef->getSolutionPath()->cost(pdef->getOptimizationObjective()) << std::endl;
 
-        // print the path to screen
-        path->print(std::cout);
+        // If a filename was specified, output the path as a matrix to
+        // that file for visualization
+        if (!outputFile.empty())
+        {
+            std::ofstream outFile(outputFile.c_str());
+            std::static_pointer_cast<og::PathGeometric>(pdef->getSolutionPath())->
+                printAsMatrix(outFile);
+            outFile.close();
+        }
     }
     else
-        std::cout << "No solution found" << std::endl;
+        std::cout << "No solution found." << std::endl;
 }
 
-void planWithSimpleSetup()
+int main()
 {
-    // construct the state space we are planning in
-    auto space(std::make_shared<ob::SE3StateSpace>());
+    double runTime = 1;
+    std::string outputFile = "solution_path.txt";
 
-    // set the bounds for the R^3 part of SE(3)
-    ob::RealVectorBounds bounds(3);
-    bounds.setLow(-1);
-    bounds.setHigh(1);
-
-    space->setBounds(bounds);
-
-    // define a simple setup class
-    og::SimpleSetup ss(space);
-
-    // set state validity checking for this space
-    ss.setStateValidityChecker([](const ob::State* state) { return isStateValid(state); });
-
-    // create a random start state
-    ob::ScopedState<> start(space);
-    start.random();
-
-    // create a random goal state
-    ob::ScopedState<> goal(space);
-    goal.random();
-
-    // set the start and goal states
-    ss.setStartAndGoalStates(start, goal);
-
-    // this call is optional, but we put it in to get more output information
-    ss.setup();
-    ss.print();
-
-    // attempt to solve the problem within one second of planning time
-    ob::PlannerStatus solved = ss.solve(1.0);
-
-    if (solved)
-    {
-        std::cout << "Found solution:" << std::endl;
-        // print the path to screen
-        ss.simplifySolution();
-        ss.getSolutionPath().print(std::cout);
-    }
-    else
-        std::cout << "No solution found" << std::endl;
-}
-
-int main(int /*argc*/, char** /*argv*/)
-{
-    std::cout << "OMPL version: " << OMPL_VERSION << std::endl;
-
-    plan();
-
-    std::cout << std::endl << std::endl;
-
-    planWithSimpleSetup();
-
+    plan(runTime, outputFile);
     return 0;
+}
+
+ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
+{
+    return std::make_shared<ob::PathLengthOptimizationObjective>(si);
+}
+
+
+ob::OptimizationObjectivePtr getBalancedObjective1(const ob::SpaceInformationPtr& si)
+{
+    auto lengthObj(std::make_shared<ob::PathLengthOptimizationObjective>(si));
+    auto opt(std::make_shared<ob::MultiOptimizationObjective>(si));
+    opt->addObjective(lengthObj, 10.0);
+
+    return ob::OptimizationObjectivePtr(opt);
 }
