@@ -54,7 +54,7 @@ private:
     WKTReader reader = *factory;
     std::string wkt_a = "POLYGON((0.5 0.5, 1 0.5, 1 1, 0.5 1, 0.5 0.5))";
     std::unique_ptr<Geometry> geom_a = reader.read(wkt_a);
-    
+
     bool isValid(const ob::State* state) const override
     {
         const auto* state2D =
@@ -64,8 +64,8 @@ private:
         double x = state2D->values[0];
         double y = state2D->values[1];
 
-        std::string wkt_b = "POINT(" + std::to_string(x)  + " " + std::to_string(y) + ")";
-        
+        std::string wkt_b = "POINT(" + std::to_string(x) + " " + std::to_string(y) + ")";
+
         WKTReader reader = *factory;
         std::unique_ptr<Geometry> geom_b = reader.read(wkt_b);
 
