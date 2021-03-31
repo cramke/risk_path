@@ -24,9 +24,21 @@
 #include <boost/algorithm/string.hpp>
 // For std::make_shared
 #include <memory>
-
 #include <fstream>
 
+
+#include <iostream>
+/* For geometry operations */
+#include <geos/geom/GeometryFactory.h>
+#include <geos/geom/Geometry.h>
+/* For WKT read/write */
+#include <geos/io/WKTReader.h>
+#include <geos/io/WKTWriter.h>
+
+/* Geometry/GeometryFactory */
+using namespace geos::geom;
+/* WKTReader/WKTWriter */
+using namespace geos::io;
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
@@ -37,9 +49,12 @@ class ValidityChecker : public ob::StateValidityChecker
 public:
     ValidityChecker(const ob::SpaceInformationPtr& si) :
         ob::StateValidityChecker(si) {}
+private:
+    GeometryFactory::Ptr factory = GeometryFactory::create();
+    WKTReader reader = *factory;
+    std::string wkt_a = "POLYGON((0.5 0.5, 1 0.5, 1 1, 0.5 1, 0.5 0.5))";
+    std::unique_ptr<Geometry> geom_a = reader.read(wkt_a);
 
-    // Returns whether the given state's position overlaps the
-    // circular obstacle
     bool isValid(const ob::State* state) const override
     {
         const auto* state2D =
@@ -49,16 +64,14 @@ public:
         double x = state2D->values[0];
         double y = state2D->values[1];
 
-        if (x > -0.1 && x < 0.1 && y > -0.1 && y < 0.1)
-        {
-            std::cout << x << std::endl;
-            std::cout << y << std::endl;
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        std::string wkt_b = "POINT(" + std::to_string(x) + " " + std::to_string(y) + ")";
+
+        WKTReader reader = *factory;
+        std::unique_ptr<Geometry> geom_b = reader.read(wkt_b);
+
+        /* Calculate intersection */
+        bool inter = geom_a->intersects(geom_b.get());
+        return not inter;
     }
 };
 
@@ -69,7 +82,7 @@ void plan(double runTime, const std::string& outputFile)
 {
     auto space(std::make_shared<ob::RealVectorStateSpace>(2));
 
-    space->setBounds(-1.0, 1.0);
+    space->setBounds(0, 2);
     auto si(std::make_shared<ob::SpaceInformation>(space));
 
     // Set the object used to check which states in the space are valid
@@ -78,14 +91,14 @@ void plan(double runTime, const std::string& outputFile)
     si->setup();
 
     ob::ScopedState<> start(space);
-    start->as<ob::RealVectorStateSpace::StateType>()->values[0] = -1.0;
-    start->as<ob::RealVectorStateSpace::StateType>()->values[1] = -1.0;
+    start->as<ob::RealVectorStateSpace::StateType>()->values[0] = 0;
+    start->as<ob::RealVectorStateSpace::StateType>()->values[1] = 0;
 
     // Set our robot's goal state to be the top-right corner of the
     // environment, or (1,1).
     ob::ScopedState<> goal(space);
-    goal->as<ob::RealVectorStateSpace::StateType>()->values[0] = 1.0;
-    goal->as<ob::RealVectorStateSpace::StateType>()->values[1] = 1.0;
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[0] = 2.0;
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[1] = 2.0;
 
     // Create a problem instance
     auto pdef(std::make_shared<ob::ProblemDefinition>(si));
