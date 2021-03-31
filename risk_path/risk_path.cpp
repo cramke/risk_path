@@ -48,6 +48,36 @@ public:
         // Extract the robot's (x,y) position from its state
         double x = state2D->values[0];
         double y = state2D->values[1];
+        
+        /* New factory with default (float) precision model */
+        GeometryFactory::Ptr factory = GeometryFactory::create();
+
+        /*
+        * Reader requires a factory to bind the geometry to
+        * for shared resources like the PrecisionModel
+        */
+        WKTReader reader(*factory);
+
+        /* Input WKT strings */
+        std::string wkt_a("POLYGON((0.5 0.5, 1 0.5, 1 1, 0.5 1, 0.5 0.5))");
+        std::string a = "POINT(";
+        std::string b = std::to_string(x);
+        std::string c = " ";
+        std::string d = std::to_string(y);
+        std::string e = ")";
+
+        std::string wkt_b(a+b+c+d+e);
+        std::cout << b << std::endl;
+
+        /* Convert WKT to Geometry */
+        std::unique_ptr<Geometry> geom_a(reader.read(wkt_a));
+        std::unique_ptr<Geometry> geom_b(reader.read(wkt_b));
+
+        /* Calculate intersection */
+        bool inter = geom_a->intersects(geom_b.get());
+
+        std::cout << inter << std::endl;
+        return not inter;
 
         if (x > -0.1 && x < 0.1 && y > -0.1 && y < 0.1)
         {
