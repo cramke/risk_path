@@ -145,7 +145,7 @@ void plan(double runTime, const std::string& outputFile)
         std::cout << "No solution found." << std::endl;
 }
 
-int main()
+int main2()
 {
     double runTime = 1;
     std::string outputFile = "solution_path.txt";
