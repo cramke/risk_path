@@ -83,5 +83,6 @@ int test()
     std::cout << "Population: " << pop1 << std::endl;
     double pop2 = ds.getPopGeo(13.3804, 52.4693);
     std::cout << "Population: " << pop2 << std::endl;
+    return 1;
 }
 

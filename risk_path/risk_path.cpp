@@ -76,6 +76,7 @@ private:
 };
 
 ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si);
+ob::OptimizationObjectivePtr getCustomObjective(const ob::SpaceInformationPtr& si);
 ob::OptimizationObjectivePtr getBalancedObjective1(const ob::SpaceInformationPtr& si);
 
 void plan(double runTime, const std::string& outputFile)
@@ -108,7 +109,7 @@ void plan(double runTime, const std::string& outputFile)
 
     // Create the optimization objective specified by our command-line argument.
     // This helper function is simply a switch statement.
-    pdef->setOptimizationObjective(getPathLengthObjective(si));
+    pdef->setOptimizationObjective(getBalancedObjective1(si));
 
     // Construct the optimal planner specified by our command line argument.
     // This helper function is simply a switch statement.
@@ -145,7 +146,7 @@ void plan(double runTime, const std::string& outputFile)
         std::cout << "No solution found." << std::endl;
 }
 
-int main2()
+int main()
 {
     double runTime = 1;
     std::string outputFile = "solution_path.txt";
@@ -154,17 +155,40 @@ int main2()
     return 0;
 }
 
+
+
+
+class CustomObjective : public ob::StateCostIntegralObjective
+{
+public:
+    CustomObjective(const ob::SpaceInformationPtr& si) : ob::StateCostIntegralObjective(si, true)
+    {
+        int i = 1;
+    }
+    ob::Cost stateCost(const ob::State* s) const
+    {
+        return ob::Cost(10.65);
+    }
+};
+
 ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
 {
     return std::make_shared<ob::PathLengthOptimizationObjective>(si);
 }
 
+ob::OptimizationObjectivePtr getCustomObjective(const ob::SpaceInformationPtr& si)
+{
+    return std::make_shared<CustomObjective>(si);
+}
 
 ob::OptimizationObjectivePtr getBalancedObjective1(const ob::SpaceInformationPtr& si)
 {
     auto lengthObj(std::make_shared<ob::PathLengthOptimizationObjective>(si));
+    auto customObj(std::make_shared<CustomObjective>(si));
     auto opt(std::make_shared<ob::MultiOptimizationObjective>(si));
-    opt->addObjective(lengthObj, 10.0);
+    opt->addObjective(lengthObj, 1.0);
+    opt->addObjective(customObj, 10.0);
 
     return ob::OptimizationObjectivePtr(opt);
 }
+
