@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-class PopMap {
+class PopulationMap {
     private:
         const char *filename = "maps/pop_deu.tif";
         GDALDataset* dataset;
@@ -13,7 +13,8 @@ class PopMap {
     public:
         double transform[6];
 
-        PopMap() {
+        PopulationMap()
+        {
             GDALAllRegister();
             dataset = (GDALDataset*)GDALOpen(filename, GA_ReadOnly);
             if (dataset != NULL) 
@@ -29,7 +30,7 @@ class PopMap {
         }
 
         
-        std::tuple<int, int> SpatialAsIndex(double xd, double yd)
+        std::tuple<int, int> SpatialAsIndex(double xd, double yd) const
         {
             // https://gdal.org/tutorials/geotransforms_tut.html
             double x = (xd - transform[0] - yd * transform[2]) / transform[1];
@@ -39,22 +40,21 @@ class PopMap {
             return std::make_tuple(x_index, y_index);
         }
 
-        std::tuple<int, int> IndexAsSpatial(int x, int y)
+        std::tuple<int, int> IndexAsSpatial(int x, int y) const
         {
             double x_spatial = transform[0] + transform[1] * x + transform[2] * y;
             double y_spatial = transform[3] + transform[4] * x + transform[5] * y;
-            std::cout << "X': " << x_spatial << " Y': " << y_spatial << std::endl;
             return std::make_tuple(x_spatial, y_spatial);
         }
 
-        float getPopIndex(int x, int y)
+        float getPopIndex(int x, int y) const 
         {
             // 27046 9315
             band->RasterIO(GF_Read, x, y, 1, 1, scanline, 1, 1, GDT_Float32, 0, 0);
             return scanline[0];
         }
 
-        float getPopGeo(double x_geo, double y_geo)
+        float getPopGeo(double x_geo, double y_geo) const
         {
             auto [x_index, y_index] = SpatialAsIndex(x_geo, y_geo);
             return getPopIndex(x_index, y_index); 
@@ -75,7 +75,8 @@ class PopMap {
 
 };
 
-int test()
+/*
+void test()
 {
     PopMap ds = PopMap();
     double pop1 = ds.getPopIndex(27046, 9315);
@@ -83,6 +84,5 @@ int test()
     std::cout << "Population: " << pop1 << std::endl;
     double pop2 = ds.getPopGeo(13.3804, 52.4693);
     std::cout << "Population: " << pop2 << std::endl;
-    return 1;
 }
-
+*/

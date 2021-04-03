@@ -35,6 +35,8 @@
 #include <geos/io/WKTReader.h>
 #include <geos/io/WKTWriter.h>
 
+#include "Population.cpp"
+
 /* Geometry/GeometryFactory */
 using namespace geos::geom;
 /* WKTReader/WKTWriter */
@@ -71,7 +73,8 @@ private:
 
         /* Calculate intersection */
         bool inter = geom_a->intersects(geom_b.get());
-        return not inter;
+        //return not inter;
+        return true;
     }
 };
 
@@ -83,7 +86,12 @@ void plan(double runTime, const std::string& outputFile)
 {
     auto space(std::make_shared<ob::RealVectorStateSpace>(2));
 
-    space->setBounds(0, 2);
+    ob::RealVectorBounds bounds = ob::RealVectorBounds(2);
+    bounds.setHigh(0, 8.614717);
+    bounds.setHigh(1, 49.936084);
+    bounds.setLow(0, 8.529526);
+    bounds.setLow(1, 49.884498);
+    space->setBounds(bounds);
     auto si(std::make_shared<ob::SpaceInformation>(space));
 
     // Set the object used to check which states in the space are valid
@@ -92,30 +100,23 @@ void plan(double runTime, const std::string& outputFile)
     si->setup();
 
     ob::ScopedState<> start(space);
-    start->as<ob::RealVectorStateSpace::StateType>()->values[0] = 0;
-    start->as<ob::RealVectorStateSpace::StateType>()->values[1] = 0;
+    start->as<ob::RealVectorStateSpace::StateType>()->values[0] = 8.614717;
+    start->as<ob::RealVectorStateSpace::StateType>()->values[1] = 49.884498;
 
     // Set our robot's goal state to be the top-right corner of the
     // environment, or (1,1).
     ob::ScopedState<> goal(space);
-    goal->as<ob::RealVectorStateSpace::StateType>()->values[0] = 2.0;
-    goal->as<ob::RealVectorStateSpace::StateType>()->values[1] = 2.0;
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[0] = 8.529526;
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[1] = 49.936084;
 
     // Create a problem instance
     auto pdef(std::make_shared<ob::ProblemDefinition>(si));
-
-    // Set the start and goal states
     pdef->setStartAndGoalStates(start, goal);
-
-    // Create the optimization objective specified by our command-line argument.
-    // This helper function is simply a switch statement.
     pdef->setOptimizationObjective(getBalancedObjective1(si));
 
     // Construct the optimal planner specified by our command line argument.
     // This helper function is simply a switch statement.
     ob::PlannerPtr optimizingPlanner = std::make_shared<og::RRTstar>(si);
-
-    // Set the problem instance for our planner to solve
     optimizingPlanner->setProblemDefinition(pdef);
     optimizingPlanner->setup();
 
@@ -156,18 +157,30 @@ int main()
 }
 
 
-
-
-class CustomObjective : public ob::StateCostIntegralObjective
+class CustomObjective : public ob::OptimizationObjective
 {
 public:
-    CustomObjective(const ob::SpaceInformationPtr& si) : ob::StateCostIntegralObjective(si, true)
+    PopulationMap map = PopulationMap();
+
+    CustomObjective(const ob::SpaceInformationPtr& si) : ob::OptimizationObjective(si) {}
+
+    ob::Cost stateCost(const ob::State* state) const
     {
-        int i = 1;
+        auto* state2D = state->as<ob::RealVectorStateSpace::StateType>();
+        // Extract the robot's (x,y) position from its state
+        double x = state2D->values[0];
+        double y = state2D->values[1];
+        double pop = map.getPopGeo(x, y);
+        return ob::Cost(pop);
     }
-    ob::Cost stateCost(const ob::State* s) const
+
+    ob::Cost motionCost(const ob::State* inital_state, const ob::State* goal_state) const
     {
-        return ob::Cost(10.65);
+        ob::Cost inital_cost = stateCost(inital_state);
+        ob::Cost goal_cost = stateCost(goal_state);
+        double total_cost = inital_cost.value() + goal_cost.value();
+        // std::cout << "Motion Cost: " << total_cost << std::endl;
+        return ob::Cost(total_cost);
     }
 };
 
@@ -188,7 +201,6 @@ ob::OptimizationObjectivePtr getBalancedObjective1(const ob::SpaceInformationPtr
     auto opt(std::make_shared<ob::MultiOptimizationObjective>(si));
     opt->addObjective(lengthObj, 1.0);
     opt->addObjective(customObj, 10.0);
-
     return ob::OptimizationObjectivePtr(opt);
 }
 
