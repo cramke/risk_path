@@ -63,8 +63,8 @@ private:
             state->as<ob::RealVectorStateSpace::StateType>();
 
         // Extract the robot's (x,y) position from its state
-        double x = state2D->values[0];
-        double y = state2D->values[1];
+        const double x = state2D->values[0];
+        const double y = state2D->values[1];
 
         std::string wkt_b = "POINT(" + std::to_string(x) + " " + std::to_string(y) + ")";
 
@@ -149,10 +149,10 @@ void plan(double runTime, const std::string& outputFile)
 
 int main()
 {
-    double runTime = 1;
-    std::string outputFile = "solution_path.txt";
+    const int SOLVER_TIMEOUT = 1;
+    const std::string outputFile = "solution_path.txt";
 
-    plan(runTime, outputFile);
+    plan(SOLVER_TIMEOUT, outputFile);
     return 0;
 }
 
@@ -178,9 +178,35 @@ public:
     {
         ob::Cost inital_cost = stateCost(inital_state);
         ob::Cost goal_cost = stateCost(goal_state);
-        double total_cost = inital_cost.value() + goal_cost.value();
-        // std::cout << "Motion Cost: " << total_cost << std::endl;
+        // double total_cost = inital_cost.value() + goal_cost.value();
+        double total_cost = projectMotionOnRaster(inital_state, goal_state);
+        std::cout << "Motion Cost: " << total_cost << std::endl;
         return ob::Cost(total_cost);
+    }
+
+    double projectMotionOnRaster(const ob::State* inital_state, const ob::State* goal_state) const
+    {
+        auto* state2D = inital_state->as<ob::RealVectorStateSpace::StateType>();
+        auto position = map.SpatialAsIndex(state2D->values[0], state2D->values[1]);
+        int start_x = std::get<0>(position);
+        int start_y = std::get<1>(position);
+        auto* goal_state_vector = goal_state->as<ob::RealVectorStateSpace::StateType>();
+        auto position2 = map.SpatialAsIndex(goal_state_vector->values[0], goal_state_vector->values[1]);
+        int goal_x = std::get<0>(position2);
+        int goal_y = std::get<1>(position2);
+
+        int delta_x = goal_x - start_x;
+        int delta_y = goal_y - start_y;
+        double cost = 0;
+        for (int i = 0; i<=delta_x; i++)
+        {
+            cost += map.getPopIndex(start_x + i, start_y);
+        }
+        for (int j = 0; j < delta_y; j++)
+        {
+            cost += map.getPopIndex(goal_x, start_y + j);
+        }
+        return cost;
     }
 };
 

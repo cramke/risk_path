@@ -2,6 +2,49 @@
 #include "cpl_conv.h" // for CPLMalloc()
 #include <iostream>
 
+class Coordinates {
+private:
+    double transform[6];
+public:
+    double lat;
+    double lon;
+    int x;
+    int y;
+    
+    Coordinates(int x, int y, double transform[6]) {
+        transform = transform;
+        x = x;
+        y = y;
+        std::tuple<double, double> spatial = index_to_spatial(x, y);
+        lat = std::get<0>(spatial);
+        lon = std::get<1>(spatial);
+    }
+
+    Coordinates(double lat, double lon, double transform[6]) {
+        transform = transform;
+        lat = lat;
+        lon = lon;
+        std::tuple<int, int> spatial = spatial_to_index(lat, lon);
+        x = std::get<0>(spatial);
+        x = std::get<1>(spatial);
+    }
+
+    std::tuple<int, int>  index_to_spatial(int xd, int yd) {
+        // https://gdal.org/tutorials/geotransforms_tut.html
+        double x = (xd - transform[0] - yd * transform[2]) / transform[1];
+        double y = (yd - transform[3] - xd * transform[4]) / transform[5];
+        int x_index = int(std::round(x));
+        int y_index = int(std::round(y));
+        return std::make_tuple(x_index, y_index);
+    }
+
+    std::tuple<double, double> spatial_to_index(double lat, double lon) {
+        double x_spatial = transform[0] + transform[1] * x + transform[2] * y;
+        double y_spatial = transform[3] + transform[4] * x + transform[5] * y;
+        return std::make_tuple(x_spatial, y_spatial);
+    }
+};
+
 
 class PopulationMap {
     private:
@@ -22,6 +65,8 @@ class PopulationMap {
                 std::cout << "Dataset successfully loaded." << std::endl;
                 dataset->GetGeoTransform(transform);
                 band = dataset->GetRasterBand(1);
+                nXSize = band->GetXSize();
+                nYSize = band->GetYSize();
             }
             else
             {
@@ -30,7 +75,7 @@ class PopulationMap {
         }
 
         
-        std::tuple<int, int> SpatialAsIndex(double xd, double yd) const
+        std::tuple<int, int> coordinates_spatial_to_index(double xd, double yd) const
         {
             // https://gdal.org/tutorials/geotransforms_tut.html
             double x = (xd - transform[0] - yd * transform[2]) / transform[1];
@@ -40,24 +85,25 @@ class PopulationMap {
             return std::make_tuple(x_index, y_index);
         }
 
-        std::tuple<int, int> IndexAsSpatial(int x, int y) const
+        std::tuple<double, double> index_to_spatial(int x, int y) const
         {
             double x_spatial = transform[0] + transform[1] * x + transform[2] * y;
             double y_spatial = transform[3] + transform[4] * x + transform[5] * y;
             return std::make_tuple(x_spatial, y_spatial);
         }
 
-        float getPopIndex(int x, int y) const 
+        float read_population_from_index(int x, int y) const 
         {
             // 27046 9315
             band->RasterIO(GF_Read, x, y, 1, 1, scanline, 1, 1, GDT_Float32, 0, 0);
             return scanline[0];
         }
 
-        float getPopGeo(double x_geo, double y_geo) const
+        float read_population_from_spatial(double x_geo, double y_geo) const
+        // TODO: x_geo / y_geo to lat lon. But which is which?
         {
-            auto [x_index, y_index] = SpatialAsIndex(x_geo, y_geo);
-            return getPopIndex(x_index, y_index); 
+            auto [x_index, y_index] = coordinates_spatial_to_index(x_geo, y_geo);
+            return read_population_from_index(x_index, y_index); 
         }
 
         void close()
@@ -65,11 +111,9 @@ class PopulationMap {
             GDALClose(dataset);
         }
 
-        void printBandSize()
-        {
-            nXSize = band->GetXSize();
+        void print_band_size()
+        {       
             std::cout << "XSize: " << nXSize << std::endl;
-            nYSize = band->GetYSize();
             std::cout << "YSize: " << nYSize << std::endl;
         }
 
