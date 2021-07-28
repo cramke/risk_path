@@ -18,28 +18,29 @@ public:
         transform = given;
         x = x;
         y = y;
-        std::tuple<double, double> spatial = index_to_spatial(x, y);
+        std::tuple<double, double> spatial = index_to_spatial_coordinates(x, y);
         lat = std::get<0>(spatial);
-        lon = std::get<1>(spatial);
+        lon = std::get<1>(spatial); 
     }
 
     Coordinates(double lat, double lon, std::array<double, 6> &given) {
         transform = given;
         lat = lat;
         lon = lon;
-        std::tuple<int, int> index = spatial_to_index(lat, lon);
+        std::tuple<int, int> index = spatial_to_index_coordinates(lat, lon);
         x = std::get<0>(index);
         y = std::get<1>(index);
     }
 
-    std::tuple<double, double>  index_to_spatial(int xd, int yd) {
+private:
+    std::tuple<double, double>  index_to_spatial_coordinates(int xd, int yd) {
         // https://gdal.org/tutorials/geotransforms_tut.html
         double lon = transform[0] + transform[1] * xd + transform[2] * yd;
         double lat = transform[3] + transform[4] * xd + transform[5] * yd;
         return std::make_tuple(lat, lon);
     }
 
-    std::tuple<int, int> spatial_to_index(double lat, double lon) {
+    std::tuple<int, int> spatial_to_index_coordinates(double lat, double lon) {
         // assert that transform[2]&[4] == 0 otherwise logic error and transform wont work.
         assert(transform[2] == 0);
         assert(transform[4] == 0);
