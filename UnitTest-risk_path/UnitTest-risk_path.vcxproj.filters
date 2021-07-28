@@ -15,11 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Population.cpp">
+    <ClCompile Include="UnitTest-risk_path.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="risk_path.cpp">
+    <ClCompile Include="pch.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

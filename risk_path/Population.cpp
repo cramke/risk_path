@@ -1,18 +1,21 @@
 #include "gdal_priv.h"
 #include "cpl_conv.h" // for CPLMalloc()
 #include <iostream>
+#include <array>
+#include <cassert>
+
 
 class Coordinates {
 private:
-    double transform[6];
+    std::array<double, 6> transform;
 public:
     double lat;
     double lon;
     int x;
     int y;
-    
-    Coordinates(int x, int y, double transform[6]) {
-        transform = transform;
+
+    Coordinates(int x, int y, std::array<double, 6> &given) {
+        transform = given;
         x = x;
         y = y;
         std::tuple<double, double> spatial = index_to_spatial(x, y);
@@ -20,41 +23,46 @@ public:
         lon = std::get<1>(spatial);
     }
 
-    Coordinates(double lat, double lon, double transform[6]) {
-        transform = transform;
+    Coordinates(double lat, double lon, std::array<double, 6> &given) {
+        transform = given;
         lat = lat;
         lon = lon;
-        std::tuple<int, int> spatial = spatial_to_index(lat, lon);
-        x = std::get<0>(spatial);
-        x = std::get<1>(spatial);
+        std::tuple<int, int> index = spatial_to_index(lat, lon);
+        x = std::get<0>(index);
+        y = std::get<1>(index);
     }
 
-    std::tuple<int, int>  index_to_spatial(int xd, int yd) {
+    std::tuple<double, double>  index_to_spatial(int xd, int yd) {
         // https://gdal.org/tutorials/geotransforms_tut.html
-        double x = (xd - transform[0] - yd * transform[2]) / transform[1];
-        double y = (yd - transform[3] - xd * transform[4]) / transform[5];
+        double lon = transform[0] + transform[1] * xd + transform[2] * yd;
+        double lat = transform[3] + transform[4] * xd + transform[5] * yd;
+        return std::make_tuple(lat, lon);
+    }
+
+    std::tuple<int, int> spatial_to_index(double lat, double lon) {
+        // assert that transform[2]&[4] == 0 otherwise logic error and transform wont work.
+        assert(transform[2] == 0);
+        assert(transform[4] == 0);
+        double x = ((lon - transform[0]) - (transform[2] * 0)) / transform[1];
+        double y = ((lat - transform[3]) - (transform[4] * 0)) / transform[5];
         int x_index = int(std::round(x));
         int y_index = int(std::round(y));
         return std::make_tuple(x_index, y_index);
-    }
-
-    std::tuple<double, double> spatial_to_index(double lat, double lon) {
-        double x_spatial = transform[0] + transform[1] * x + transform[2] * y;
-        double y_spatial = transform[3] + transform[4] * x + transform[5] * y;
-        return std::make_tuple(x_spatial, y_spatial);
     }
 };
 
 
 class PopulationMap {
     private:
-        const char *filename = "maps/pop_deu.tif";
+        const char *filename = "C:/Users/carst/source/repos/risk_path/risk_path/maps/pop_deu.tif";
         GDALDataset* dataset;
         GDALRasterBand* band;
         float* scanline = (float*)CPLMalloc(sizeof(float) * 1);
         int             nXSize, nYSize;
     public:
-        double transform[6];
+        double transformer[6];
+        bool has_file_loaded = false;
+        std::array<double, 6> transform;
 
         PopulationMap()
         {
@@ -63,47 +71,38 @@ class PopulationMap {
             if (dataset != NULL) 
             {
                 std::cout << "Dataset successfully loaded." << std::endl;
-                dataset->GetGeoTransform(transform);
+                dataset->GetGeoTransform(transformer);
+                transform_array();
                 band = dataset->GetRasterBand(1);
                 nXSize = band->GetXSize();
                 nYSize = band->GetYSize();
+                has_file_loaded = true;
             }
             else
             {
                 printf("The dataset failed to open. Maybe check the filename?");
+                has_file_loaded = false;
             }
         }
 
-        
-        std::tuple<int, int> coordinates_spatial_to_index(double xd, double yd) const
+        void transform_array()
         {
-            // https://gdal.org/tutorials/geotransforms_tut.html
-            double x = (xd - transform[0] - yd * transform[2]) / transform[1];
-            double y = (yd - transform[3] - xd * transform[4]) / transform[5];
-            int x_index = int(std::round(x));
-            int y_index = int(std::round(y));
-            return std::make_tuple(x_index, y_index);
+            for (int i=0; i<6; i++)
+            {
+                transform[i] = transformer[i];
+            }
         }
 
-        std::tuple<double, double> index_to_spatial(int x, int y) const
-        {
-            double x_spatial = transform[0] + transform[1] * x + transform[2] * y;
-            double y_spatial = transform[3] + transform[4] * x + transform[5] * y;
-            return std::make_tuple(x_spatial, y_spatial);
-        }
-
-        float read_population_from_index(int x, int y) const 
+        float read_population_from_coordinates(Coordinates coords) const 
         {
             // 27046 9315
-            band->RasterIO(GF_Read, x, y, 1, 1, scanline, 1, 1, GDT_Float32, 0, 0);
+            band->RasterIO(GF_Read, coords.x, coords.y, 1, 1, scanline, 1, 1, GDT_Float32, 0, 0);
             return scanline[0];
         }
 
-        float read_population_from_spatial(double x_geo, double y_geo) const
-        // TODO: x_geo / y_geo to lat lon. But which is which?
+        float read_population_from_coordinates() const
         {
-            auto [x_index, y_index] = coordinates_spatial_to_index(x_geo, y_geo);
-            return read_population_from_index(x_index, y_index); 
+            return 6.0;
         }
 
         void close()
@@ -118,15 +117,3 @@ class PopulationMap {
         }
 
 };
-
-/*
-void test()
-{
-    PopMap ds = PopMap();
-    double pop1 = ds.getPopIndex(27046, 9315);
-    ds.IndexAsSpatial(27046, 9315);
-    std::cout << "Population: " << pop1 << std::endl;
-    double pop2 = ds.getPopGeo(13.3804, 52.4693);
-    std::cout << "Population: " << pop2 << std::endl;
-}
-*/

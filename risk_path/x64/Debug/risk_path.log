@@ -1,0 +1,33 @@
+﻿  risk_path.cpp
+C:\src\vcpkg\installed\x64-windows\include\ompl\base\ProblemDefinition.h(209,1): warning C4267: "return": Konvertierung von "size_t" nach "unsigned int", Datenverlust möglich
+C:\src\vcpkg\installed\x64-windows\include\ompl\util\Time.h(82,38): error C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\src\vcpkg\installed\x64-windows\include\ompl\datastructures\Permutation.h(55,1): warning C4267: "Argument": Konvertierung von "size_t" nach "unsigned int", Datenverlust möglich
+C:\src\vcpkg\installed\x64-windows\include\boost\detail\iterator.hpp(13): message : This header is deprecated. Use <iterator> instead.
+C:\src\vcpkg\installed\x64-windows\include\ompl\geometric\planners\prm\PRM.h(278,1): warning C4267: "return": Konvertierung von "size_t" nach "unsigned long", Datenverlust möglich
+C:\src\vcpkg\installed\x64-windows\include\ompl\geometric\planners\prm\PRM.h(284,1): warning C4267: "return": Konvertierung von "size_t" nach "unsigned long", Datenverlust möglich
+  The GEOS C++ API is unstable, please use the C API instead
+  HINT: #include geos_c.h
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(173,26): error C2039: "getPopGeo" ist kein Member von "PopulationMap".
+C:\Users\carst\source\repos\risk_path\risk_path\Population.cpp(49): message : Siehe Deklaration von "PopulationMap"
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(190,29): error C2039: "SpatialAsIndex" ist kein Member von "PopulationMap".
+C:\Users\carst\source\repos\risk_path\risk_path\Population.cpp(49): message : Siehe Deklaration von "PopulationMap"
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(191,1): error C3536: "position": Kann nicht verwendet werden, bevor es initialisiert wurde.
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(191,28): error C2672: "std::get": keine übereinstimmende überladene Funktion gefunden
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(191,1): error C2784: "tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept": Vorlage-Argument für "std::pair<_Ty1,_Ty2> &" konnte nicht von "int" hergeleitet werden.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\utility(540): message : Siehe Deklaration von "std::get"
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(192,28): error C2672: "std::get": keine übereinstimmende überladene Funktion gefunden
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(192,1): error C2784: "tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept": Vorlage-Argument für "std::pair<_Ty1,_Ty2> &" konnte nicht von "int" hergeleitet werden.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\utility(540): message : Siehe Deklaration von "std::get"
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(194,30): error C2039: "SpatialAsIndex" ist kein Member von "PopulationMap".
+C:\Users\carst\source\repos\risk_path\risk_path\Population.cpp(49): message : Siehe Deklaration von "PopulationMap"
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(195,1): error C3536: "position2": Kann nicht verwendet werden, bevor es initialisiert wurde.
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(195,27): error C2672: "std::get": keine übereinstimmende überladene Funktion gefunden
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(195,1): error C2784: "tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept": Vorlage-Argument für "std::pair<_Ty1,_Ty2> &" konnte nicht von "int" hergeleitet werden.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\utility(540): message : Siehe Deklaration von "std::get"
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(196,27): error C2672: "std::get": keine übereinstimmende überladene Funktion gefunden
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(196,1): error C2784: "tuple_element<_Idx,std::pair<_Ty1,_Ty2>>::type &std::get(std::pair<_Ty1,_Ty2> &) noexcept": Vorlage-Argument für "std::pair<_Ty1,_Ty2> &" konnte nicht von "int" hergeleitet werden.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\utility(540): message : Siehe Deklaration von "std::get"
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(203,25): error C2039: "getPopIndex" ist kein Member von "PopulationMap".
+C:\Users\carst\source\repos\risk_path\risk_path\Population.cpp(49): message : Siehe Deklaration von "PopulationMap"
+C:\Users\carst\source\repos\risk_path\risk_path\risk_path.cpp(207,25): error C2039: "getPopIndex" ist kein Member von "PopulationMap".
+C:\Users\carst\source\repos\risk_path\risk_path\Population.cpp(49): message : Siehe Deklaration von "PopulationMap"
