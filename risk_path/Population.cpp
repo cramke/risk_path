@@ -71,7 +71,6 @@ class PopulationMap {
             dataset = (GDALDataset*)GDALOpen(filename, GA_ReadOnly);
             if (dataset != NULL) 
             {
-                std::cout << "Dataset successfully loaded." << std::endl;
                 dataset->GetGeoTransform(transformer);
                 transform_array();
                 band = dataset->GetRasterBand(1);
@@ -94,16 +93,11 @@ class PopulationMap {
             }
         }
 
-        float read_population_from_coordinates(Coordinates coords) const 
+        double read_population_from_coordinates(Coordinates coords) const 
         {
             // 27046 9315
             band->RasterIO(GF_Read, coords.x, coords.y, 1, 1, scanline, 1, 1, GDT_Float32, 0, 0);
-            return scanline[0];
-        }
-
-        float read_population_from_coordinates() const
-        {
-            return 6.0;
+            return (double) scanline[0];
         }
 
         void close()
