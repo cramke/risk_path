@@ -2,6 +2,7 @@
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/SimpleSetup.h>
+#include <ompl/base/objectives/PathLengthOptimizationObjective.h>
 
 #include <ompl/config.h>
 #include <iostream>
@@ -11,15 +12,28 @@
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
 
-bool isStateValid(const ob::State* state)
+class ProjectValidityChecker : public ob::StateValidityChecker
 {
-    const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
+private:
+    PopulationMap* map = new PopulationMap();
 
-    PopulationMap map = PopulationMap();
-    Coordinates* point = new Coordinates(12, 8, map.transform);
+public:
+    ProjectValidityChecker(const ob::SpaceInformationPtr& si) : ob::StateValidityChecker(si)
+    {
+        
+    }
 
-    // return a value that is always true but uses the two variables we define, so we avoid compiler warnings
-    return pos[2] == 100 && pos[1] != pos[0];
+    bool isValid(const ob::State* state) const override
+    {
+        const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
+        Coordinates point = Coordinates(pos[0], pos[1], map->transform);
+        return pos[2] == 100 && pos[1] != pos[0];
+    }
+};
+
+ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
+{
+    return std::make_shared<ob::PathLengthOptimizationObjective>(si);
 }
 
 
@@ -40,18 +54,22 @@ void planWithSimpleSetup()
     og::SimpleSetup ss(space);
 
     // set state validity checking for this space
-    ss.setStateValidityChecker([](const ob::State* state) { return isStateValid(state); });
+    auto si(std::make_shared<ob::SpaceInformation>(space));
+    si->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si));
 
     // create a random start / goal state
     ob::ScopedState<> start(space);
-    start[0] = 49.86462268679067;
-    start[1] = 8.657507656252882;
+    start->as<ob::RealVectorStateSpace::StateType>()->values[0] = 49.86462268679067;
+    start->as<ob::RealVectorStateSpace::StateType>()->values[1] = 8.657507656252882;
     start[2] = 100;
     ob::ScopedState<> goal(space);
     goal[0] = 50.107998827159896;
     goal[1] = 8.68757388575945;
     goal[2] = 100;
     ss.setStartAndGoalStates(start, goal);
+
+    auto pdef(std::make_shared<ob::ProblemDefinition>(si));
+    pdef->setOptimizationObjective(getPathLengthObjective(si));
 
     // this call is optional, but we put it in to get more output information
     ss.setup();
