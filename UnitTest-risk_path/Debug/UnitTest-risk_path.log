@@ -75,4 +75,5 @@ C:\src\vcpkg\installed\x86-windows\include\gdal_priv.h(2561,17): warning C4251: 
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include\xstring(4905): message : Siehe Deklaration von "std::basic_string<char,std::char_traits<char>,std::allocator<char>>"
 C:\src\vcpkg\installed\x86-windows\include\gdal_priv.h(2574,32): warning C4251: "GDALDimensionWeakIndexingVar::m_poIndexingVariable": class "std::weak_ptr<GDALMDArray>" erfordert eine DLL-Schnittstelle, die von Clients von class "GDALDimensionWeakIndexingVar" verwendet wird
 C:\src\vcpkg\installed\x86-windows\include\gdal_priv.h(2574): message : Siehe Deklaration von "std::weak_ptr<GDALMDArray>"
+     Bibliothek "C:\Users\carst\source\repos\risk_path\Debug\UnitTest-risk_path.lib" und Objekt "C:\Users\carst\source\repos\risk_path\Debug\UnitTest-risk_path.exp" werden erstellt.
   UnitTest-risk_path.vcxproj -> C:\Users\carst\source\repos\risk_path\Debug\UnitTest-risk_path.dll

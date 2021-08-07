@@ -15,7 +15,7 @@ namespace og = ompl::geometric;
 class ProjectValidityChecker : public ob::StateValidityChecker
 {
 private:
-    PopulationMap* map = new PopulationMap();
+    PopulationMap map = PopulationMap();
 
 public:
     ProjectValidityChecker(const ob::SpaceInformationPtr& si) : ob::StateValidityChecker(si)
@@ -26,8 +26,10 @@ public:
     bool isValid(const ob::State* state) const override
     {
         const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-        Coordinates point = Coordinates(pos[0], pos[1], map->transform);
-        return pos[2] == 100 && pos[1] != pos[0];
+        double lat = pos[0];
+        double lon = pos[1];
+        Coordinates point = Coordinates(lat, lon, map);
+        return point.check_map_bounds();
     }
 };
 
