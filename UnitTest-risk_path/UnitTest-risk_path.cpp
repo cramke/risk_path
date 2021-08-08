@@ -73,7 +73,13 @@ namespace UnitTestPopulationMap
 		{
 			Coordinates point = Coordinates(52.3, 8.9, map);
 			Assert::IsTrue(point.check_map_bounds());
+		}	
+		TEST_METHOD(TestMethod_ReadPopulation)
+		{
+			Coordinates point = Coordinates(52.368830, 9.75593335, map);
+			double expected_population = 5.97513;
+			double population = point.get_population();
+			Assert::AreEqual(expected_population, population, delta);
 		}
-			
 	};
 }

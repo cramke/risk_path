@@ -135,6 +135,10 @@ public:
             return false;
         }
     }
+
+    double get_population() {
+        return map.read_population_from_indexes(x, y);
+    }
 };
 
 

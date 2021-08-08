@@ -1,8 +1,10 @@
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
+#include <ompl/geometric/planners/prm/PRMstar.h>
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/base/objectives/PathLengthOptimizationObjective.h>
+#include <ompl/base/OptimizationObjective.h>
 
 #include <ompl/config.h>
 #include <iostream>
@@ -19,8 +21,7 @@ private:
 
 public:
     ProjectValidityChecker(const ob::SpaceInformationPtr& si) : ob::StateValidityChecker(si)
-    {
-        
+    {    
     }
 
     bool isValid(const ob::State* state) const override
@@ -33,9 +34,16 @@ public:
     }
 };
 
+
 ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
 {
     return std::make_shared<ob::PathLengthOptimizationObjective>(si);
+}
+
+
+ob::PlannerPtr allocatePlanner(const ob::SpaceInformationPtr si)
+{
+    return std::make_shared<og::PRMstar>(si);
 }
 
 
@@ -44,20 +52,17 @@ void planWithSimpleSetup()
     auto space(std::make_shared<ob::RealVectorStateSpace>(3));
 
     ob::RealVectorBounds bounds(3);
-    bounds.setLow(0,47);
-    bounds.setHigh(0,55);
+    bounds.setLow(0,49);
+    bounds.setHigh(0,51);
     bounds.setLow(1,5.86);
-    bounds.setHigh(1,15);
+    bounds.setHigh(1,9);
     bounds.setLow(2,100);
     bounds.setHigh(2,100);
     space->setBounds(bounds);
 
     // define a simple setup class
     og::SimpleSetup ss(space);
-
-    // set state validity checking for this space
-    auto si(std::make_shared<ob::SpaceInformation>(space));
-    si->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si));
+    ob::SpaceInformationPtr si = ss.getSpaceInformation();
 
     // create a random start / goal state
     ob::ScopedState<> start(space);
@@ -70,14 +75,15 @@ void planWithSimpleSetup()
     goal[2] = 100;
     ss.setStartAndGoalStates(start, goal);
 
-    auto pdef(std::make_shared<ob::ProblemDefinition>(si));
-    pdef->setOptimizationObjective(getPathLengthObjective(si));
+    ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si));
+    ss.setOptimizationObjective(getPathLengthObjective(si));
+    ss.setPlanner(allocatePlanner(si));
 
     // this call is optional, but we put it in to get more output information
     ss.setup();
     ss.print();
 
-    const int PLANNING_TIME = 1;
+    const int PLANNING_TIME = 5;
     ob::PlannerStatus solved = ss.solve(PLANNING_TIME);
 
     if (solved)
