@@ -34,22 +34,20 @@ public:
     }
 };
 
-
-ob::OptimizationObjectivePtr getPathLengthObjective(const ob::SpaceInformationPtr& si)
+class CustomOptimizationObjective : ob::OptimizationObjective
 {
-    return std::make_shared<ob::PathLengthOptimizationObjective>(si);
-}
+    CustomOptimizationObjective(ob::SpaceInformationPtr& si) : ob::OptimizationObjective(si)
+    {}
 
-
-ob::PlannerPtr allocatePlanner(const ob::SpaceInformationPtr si)
-{
-    return std::make_shared<og::PRMstar>(si);
-}
-
+    ob::Cost motionCost(const ob::State* s1, const ob::State* s2) const override
+    {
+        throw "CustomOptimizationObjective.motionCost(): Not yet implemented!";
+    }
+};
 
 void planWithSimpleSetup()
 {
-    auto space(std::make_shared<ob::RealVectorStateSpace>(3));
+    auto space = std::make_shared<ob::RealVectorStateSpace>(3);
 
     ob::RealVectorBounds bounds(3);
     bounds.setLow(0,49);
@@ -76,8 +74,8 @@ void planWithSimpleSetup()
     ss.setStartAndGoalStates(start, goal);
 
     ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si));
-    ss.setOptimizationObjective(getPathLengthObjective(si));
-    ss.setPlanner(allocatePlanner(si));
+    ss.setOptimizationObjective(std::make_shared<ob::PathLengthOptimizationObjective>(si));
+    ss.setPlanner(std::make_shared<og::PRMstar>(si));
 
     // this call is optional, but we put it in to get more output information
     ss.setup();

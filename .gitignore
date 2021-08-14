@@ -9,3 +9,8 @@
 /risk_path/maps
 /risk_path/simple_tree.bt
 /risk_path/simple_tree.bt.edit.bt
+*.props
+*.tlog
+*.dll
+/.vs/Path/v16
+/packages/vcpkg.C.src.vcpkg.1.0.0
