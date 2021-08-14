@@ -30,7 +30,7 @@ public:
         double lat = pos[0];
         double lon = pos[1];
         Coordinates point = Coordinates(lat, lon, map);
-        return point.check_map_bounds();
+        return map.check_map_bounds(lat, lon);
     }
 };
 

@@ -4,6 +4,7 @@
 #include <array>
 #include <cassert>
 
+
 class PopulationMap {
 private:
     const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/maps/pop_deu.tif";
@@ -74,57 +75,8 @@ public:
         return std::make_tuple(lower_lat, upper_lat, lower_lon, upper_lon);
     }
 
-};
-
-class Coordinates {
-public:
-    PopulationMap map;
-    double lat;
-    double lon;
-    int x;
-    int y;
-
-    Coordinates(int x_given, int y_given, const PopulationMap& map_given) {
-        map = map_given;
-        x = x_given;
-        y = y_given;
-        std::tuple<double, double> spatial = index_to_spatial_coordinates(x, y);
-        lat = std::get<0>(spatial);
-        lon = std::get<1>(spatial);
-        if (!check_map_bounds()) {
-            std::cout << "Coordinate is out of Map boundaries" << std::endl;
-        }
-    }
-
-    Coordinates(double lat_given, double lon_given, const PopulationMap& map_given) {
-        map = map_given;
-        lat = lat_given;
-        lon = lon_given;
-        std::tuple<int, int> index = spatial_to_index_coordinates(lat, lon);
-        x = std::get<0>(index);
-        y = std::get<1>(index);
-        if (!check_map_bounds()) {
-            std::cout << "Coordinate is out of Map boundaries" << std::endl;
-        }
-    }
-
-    std::tuple<double, double>  index_to_spatial_coordinates(int xd, int yd) {
-        // https://gdal.org/tutorials/geotransforms_tut.html
-        double lon = map.transform[0] + map.transform[1] * xd + map.transform[2] * yd;
-        double lat = map.transform[3] + map.transform[4] * xd + map.transform[5] * yd;
-        return std::make_tuple(lat, lon);
-    }
-
-    std::tuple<int, int> spatial_to_index_coordinates(double lat, double lon) {
-        double x = ((lon - map.transform[0]) - (map.transform[2] * 0)) / map.transform[1];
-        double y = ((lat - map.transform[3]) - (map.transform[4] * 0)) / map.transform[5];
-        int x_index = int(std::round(x));
-        int y_index = int(std::round(y));
-        return std::make_tuple(x_index, y_index);
-    }
-
-    bool check_map_bounds() {
-        auto bounds = map.get_spatial_bounds();
+    bool check_map_bounds(double lat, double lon) const {
+        auto bounds = PopulationMap::get_spatial_bounds();
         if (lat > std::get<0>(bounds) &&
             lat < std::get<1>(bounds) &&
             lon > std::get<2>(bounds) &&
@@ -136,9 +88,49 @@ public:
         }
     }
 
-    double get_population() {
-        return map.read_population_from_indexes(x, y);
+    double get_population(int x, int y) {
+        return PopulationMap::read_population_from_indexes(x, y);
     }
 };
 
+class Coordinates {
+public:
+    std::array<double, 6> transform;
+    double lat;
+    double lon;
+    int x;
+    int y;
 
+    Coordinates(int x_given, int y_given, const PopulationMap& map_given) {
+        transform = map_given.transform;
+        x = x_given;
+        y = y_given;
+        std::tuple<double, double> spatial = index_to_spatial_coordinates(x, y);
+        lat = std::get<0>(spatial);
+        lon = std::get<1>(spatial);
+    }
+
+    Coordinates(double lat_given, double lon_given, const PopulationMap& map_given) {
+        transform = map_given.transform;
+        lat = lat_given;
+        lon = lon_given;
+        std::tuple<int, int> index = spatial_to_index_coordinates(lat, lon);
+        x = std::get<0>(index);
+        y = std::get<1>(index);
+    }
+
+    std::tuple<double, double>  index_to_spatial_coordinates(int xd, int yd) {
+        // https://gdal.org/tutorials/geotransforms_tut.html
+        double lon = transform[0] + transform[1] * xd + transform[2] * yd;
+        double lat = transform[3] + transform[4] * xd + transform[5] * yd;
+        return std::make_tuple(lat, lon);
+    }
+
+    std::tuple<int, int> spatial_to_index_coordinates(double lat, double lon) {
+        double x = ((lon - transform[0]) - (transform[2] * 0)) / transform[1];
+        double y = ((lat - transform[3]) - (transform[4] * 0)) / transform[5];
+        int x_index = int(std::round(x));
+        int y_index = int(std::round(y));
+        return std::make_tuple(x_index, y_index);
+    }
+};
