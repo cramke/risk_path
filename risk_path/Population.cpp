@@ -6,7 +6,7 @@
 
 class PopulationMap {
 private:
-    const char* filename = "C:/Users/carst/source/repos/risk_path/risk_path/maps/pop_deu.tif";
+    const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/maps/pop_deu.tif";
     GDALDataset* dataset;
     GDALRasterBand* band;
     float* scanline = (float*)CPLMalloc(sizeof(float) * 1);
