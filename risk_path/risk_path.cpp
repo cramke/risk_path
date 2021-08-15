@@ -21,8 +21,7 @@ private:
 
 public:
     ProjectValidityChecker(const ob::SpaceInformationPtr& si) : ob::StateValidityChecker(si)
-    {    
-    }
+    {}
 
     bool isValid(const ob::State* state) const override
     {
@@ -34,14 +33,28 @@ public:
     }
 };
 
-class CustomOptimizationObjective : ob::OptimizationObjective
+class CustomOptimizationObjective : public ob::OptimizationObjective
 {
+private:
+    PopulationMap map = PopulationMap();
+
+public:
     CustomOptimizationObjective(ob::SpaceInformationPtr& si) : ob::OptimizationObjective(si)
     {}
 
+    ob::Cost stateCost(const ob::State* state) const override
+    {
+        const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
+        double lat = pos[0];
+        double lon = pos[1];
+        Coordinates point = Coordinates(lat, lon, map);
+        double cost_value = map.read_population_from_indexes(point.x, point.y);
+        return ob::Cost(cost_value);
+    }
+
     ob::Cost motionCost(const ob::State* s1, const ob::State* s2) const override
     {
-        throw "CustomOptimizationObjective.motionCost(): Not yet implemented!";
+        return ob::Cost(1.0);
     }
 };
 
@@ -74,14 +87,15 @@ void planWithSimpleSetup()
     ss.setStartAndGoalStates(start, goal);
 
     ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si));
-    ss.setOptimizationObjective(std::make_shared<ob::PathLengthOptimizationObjective>(si));
+    auto population_objective = std::make_shared<CustomOptimizationObjective>(si);
+    ss.setOptimizationObjective(population_objective);
     ss.setPlanner(std::make_shared<og::PRMstar>(si));
 
     // this call is optional, but we put it in to get more output information
     ss.setup();
     ss.print();
 
-    const int PLANNING_TIME = 5;
+    const int PLANNING_TIME = 1;
     ob::PlannerStatus solved = ss.solve(PLANNING_TIME);
 
     if (solved)
