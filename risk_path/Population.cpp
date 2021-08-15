@@ -32,7 +32,7 @@ public:
         else
         {
             printf("The dataset failed to open. Maybe check the filename?");
-            has_file_loaded = false;
+            throw std::runtime_error("File not found or file is empty");
         }
     }
 

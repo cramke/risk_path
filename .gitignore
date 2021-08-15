@@ -2,6 +2,7 @@
 # Diese .gitignore-Datei wurde von Microsoft(R) Visual Studio automatisch erstellt.
 ################################################################################
 
+/x64
 /Debug
 /risk_path/Debug
 /.vs/risk_path/v16
