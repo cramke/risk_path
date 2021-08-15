@@ -67,18 +67,18 @@ namespace UnitTestPopulationMap
 		TEST_METHOD(TestMethod_OutOfBounds)
 		{
 			Coordinates point = Coordinates(23.453, 45.036, map);
-			Assert::IsFalse(point.check_map_bounds());
+			Assert::IsFalse(map.check_map_bounds(point.lat, point.lon));
 		}
 		TEST_METHOD(TestMethod_InBounds)
 		{
 			Coordinates point = Coordinates(52.3, 8.9, map);
-			Assert::IsTrue(point.check_map_bounds());
+			Assert::IsTrue(map.check_map_bounds(point.lat, point.lon));
 		}	
 		TEST_METHOD(TestMethod_ReadPopulation)
 		{
 			Coordinates point = Coordinates(52.368830, 9.75593335, map);
 			double expected_population = 5.97513;
-			double population = point.get_population();
+			double population = map.get_population(point.x, point.y);
 			Assert::AreEqual(expected_population, population, delta);
 		}
 	};
