@@ -8,8 +8,9 @@
 
 #include <ompl/config.h>
 #include <iostream>
-#include "Population.cpp"
-#include "risk_path.h"
+
+#include "Population.h"
+#include "Vector.h"
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
@@ -17,11 +18,15 @@ namespace og = ompl::geometric;
 class ProjectValidityChecker : public ob::StateValidityChecker
 {
 private:
-    PopulationMap map = PopulationMap();
+    std::shared_ptr<PopulationMap> map;
 
 public:
-    ProjectValidityChecker(const ob::SpaceInformationPtr& si) : ob::StateValidityChecker(si)
-    {}
+
+
+    ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<PopulationMap> map_given) : ob::StateValidityChecker(si)
+    {
+        map = map_given;
+    }
 
     bool isValid(const ob::State* state) const override
     {
@@ -29,18 +34,20 @@ public:
         double lat = pos[0];
         double lon = pos[1];
         Coordinates point = Coordinates(lat, lon, map);
-        return map.check_map_bounds(lat, lon);
+        return map->check_map_bounds(lat, lon);
     }
 };
 
 class CustomOptimizationObjective : public ob::OptimizationObjective
 {
 private:
-    PopulationMap map = PopulationMap();
+    std::shared_ptr<PopulationMap> map;
 
 public:
-    CustomOptimizationObjective(ob::SpaceInformationPtr& si) : ob::OptimizationObjective(si)
-    {}
+    CustomOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<PopulationMap> map_given) : ob::OptimizationObjective(si)
+    {
+        map = map_given;
+    }
 
     ob::Cost stateCost(const ob::State* state) const override
     {
@@ -48,7 +55,8 @@ public:
         double lat = pos[0];
         double lon = pos[1];
         Coordinates point = Coordinates(lat, lon, map);
-        double cost_value = map.read_population_from_indexes(point.x, point.y);
+
+        double cost_value = map->read_population_from_indexes(point.x, point.y);
         return ob::Cost(cost_value);
     }
 
@@ -58,7 +66,7 @@ public:
     }
 };
 
-void planWithSimpleSetup()
+void planWithSimpleSetup(std::shared_ptr<PopulationMap> map)
 {
     auto space = std::make_shared<ob::RealVectorStateSpace>(3);
 
@@ -86,8 +94,8 @@ void planWithSimpleSetup()
     goal[2] = 100;
     ss.setStartAndGoalStates(start, goal);
 
-    ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si));
-    auto population_objective = std::make_shared<CustomOptimizationObjective>(si);
+    ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, map));
+    auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
     ss.setOptimizationObjective(population_objective);
     ss.setPlanner(std::make_shared<og::PRMstar>(si));
 
@@ -109,7 +117,7 @@ void planWithSimpleSetup()
 
 int main(int /*argc*/, char** /*argv*/)
 {
-    std::cout << "OMPL version: " << OMPL_VERSION << std::endl;
-    std::cout << std::endl << std::endl;
-    planWithSimpleSetup();
+    auto pop_map = std::make_shared<PopulationMap>();
+    // planWithSimpleSetup(pop_map);
+    Vector vec = Vector(3);
 }
