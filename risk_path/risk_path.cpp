@@ -74,6 +74,7 @@ class PlanningSetup
 public:
     std::shared_ptr<ob::RealVectorStateSpace> space;
     std::shared_ptr<og::SimpleSetup> ss;
+    ob::SpaceInformationPtr si;
 
     PlanningSetup(std::shared_ptr<PopulationMap> map, std::array<double, 3> start_coords, std::array<double, 3> goal_coords)
     {
@@ -81,18 +82,13 @@ public:
         set_boundaries();
 
         ss = std::make_shared<og::SimpleSetup>(space);
-
-        ob::SpaceInformationPtr si = ss->getSpaceInformation();
+        si = ss->getSpaceInformation();
 
         std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start_coords[0] - 0.001, start_coords[1] - 0.001, goal_coords[0] + 0.001, goal_coords[1] + 0.001);
         ss->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
         auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
         ss->setOptimizationObjective(population_objective);
         ss->setPlanner(std::make_shared<og::PRMstar>(si));
-
-        // this call is optional, but we put it in to get more output information
-        ss->setup();
-        ss->print();
     }
 
     void set_boundaries() 
@@ -121,6 +117,9 @@ public:
 
     void solve()
     {
+        // this call is optional, but we put it in to get more output information
+        ss->setup();
+        ss->print();
         const int PLANNING_TIME = 1;
         ob::PlannerStatus solved = ss->solve(PLANNING_TIME);
         if (solved)
