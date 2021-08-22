@@ -76,19 +76,22 @@ public:
     std::shared_ptr<og::SimpleSetup> ss;
     ob::SpaceInformationPtr si;
 
-    PlanningSetup(std::shared_ptr<PopulationMap> map, std::array<double, 3> start_coords, std::array<double, 3> goal_coords)
+    PlanningSetup(std::shared_ptr<PopulationMap> map)
     {
         space = std::make_shared<ob::RealVectorStateSpace>(3);
-        set_boundaries();
-
         ss = std::make_shared<og::SimpleSetup>(space);
         si = ss->getSpaceInformation();
 
-        std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start_coords[0] - 0.001, start_coords[1] - 0.001, goal_coords[0] + 0.001, goal_coords[1] + 0.001);
-        ss->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
+        
         auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
         ss->setOptimizationObjective(population_objective);
         ss->setPlanner(std::make_shared<og::PRMstar>(si));
+    }
+
+    void set_validity_checker(std::array<double, 3> start_coords, std::array<double, 3> goal_coords)
+    {
+        std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start_coords[0] - 0.001, start_coords[1] - 0.001, goal_coords[0] + 0.001, goal_coords[1] + 0.001);
+        ss->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
     }
 
     void set_boundaries() 
@@ -102,6 +105,7 @@ public:
         bounds.setHigh(2, 100);
         space->setBounds(bounds);
     }
+
     void set_start_goal(std::array<double, 3> start_coords, std::array<double, 3> goal_coords)
     {
         ob::ScopedState<> start_state(space);
@@ -140,7 +144,9 @@ int main(int /*argc*/, char** /*argv*/)
     std::array<double, 3> goal_point = { 50.107998827159896, 8.68757388575945, 100 };
     auto pop_map = std::make_shared<PopulationMap>();
 
-    PlanningSetup planner = PlanningSetup(pop_map, start_point, goal_point);
+    PlanningSetup planner = PlanningSetup(pop_map);
     planner.set_start_goal(start_point, goal_point);
+    planner.set_boundaries();
+    planner.set_validity_checker(start_point, goal_point);
     planner.solve();
 }
