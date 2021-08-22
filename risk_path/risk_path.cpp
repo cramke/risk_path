@@ -1,23 +1,4 @@
-#include <ompl/base/SpaceInformation.h>
-#include <ompl/base/spaces/SE3StateSpace.h>
-#include <ompl/geometric/planners/rrt/RRTConnect.h>
-#include <ompl/geometric/planners/prm/PRMstar.h>
-#include <ompl/geometric/SimpleSetup.h>
-#include <ompl/base/objectives/PathLengthOptimizationObjective.h>
-#include <ompl/base/OptimizationObjective.h>
-
-
-#include <ompl/config.h>
-#include <iostream>
-
-#include "Population.h"
-#include "Vector.h"
-
-
-
-namespace ob = ompl::base;
-namespace og = ompl::geometric;
-namespace bg = boost::geometry;
+#include "risk_path.h"
 
 class ProjectValidityChecker : public ob::StateValidityChecker
 {
