@@ -1,6 +1,9 @@
 #include "Vector.h"
 
-Vector::Vector(int x) : num(x)
+Vector::Vector(double ax, double ay, double bx, double by)
 {
-	std::cout << num;
+	polygon poly;
+	const double coor[][2] = { {ax, ay}, {ax, by}, {bx, by}, {bx, ay}, {ax, ay} };
+	bg::assign_points(poly, coor);
 }
+
