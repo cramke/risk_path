@@ -6,26 +6,31 @@
 #include <ompl/base/objectives/PathLengthOptimizationObjective.h>
 #include <ompl/base/OptimizationObjective.h>
 
+
 #include <ompl/config.h>
 #include <iostream>
 
 #include "Population.h"
 #include "Vector.h"
 
+
+
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
+namespace bg = boost::geometry;
 
 class ProjectValidityChecker : public ob::StateValidityChecker
 {
 private:
     std::shared_ptr<PopulationMap> map;
+    std::shared_ptr<Vector> boundaries;
 
 public:
 
-
-    ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<PopulationMap> map_given) : ob::StateValidityChecker(si)
+    ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<PopulationMap> map_given, std::shared_ptr<Vector> bounds) : ob::StateValidityChecker(si)
     {
         map = map_given;
+        boundaries = bounds;
     }
 
     bool isValid(const ob::State* state) const override
@@ -34,7 +39,8 @@ public:
         double lat = pos[0];
         double lon = pos[1];
         Coordinates point = Coordinates(lat, lon, map);
-        return map->check_map_bounds(lat, lon);
+        bool valid = boundaries->within(point.lat, point.lon);
+        return valid;
     }
 };
 
@@ -85,8 +91,8 @@ void planWithSimpleSetup(std::shared_ptr<PopulationMap> map)
 
     // create a random start / goal state
     ob::ScopedState<> start(space);
-    start->as<ob::RealVectorStateSpace::StateType>()->values[0] = 49.86462268679067;
-    start->as<ob::RealVectorStateSpace::StateType>()->values[1] = 8.657507656252882;
+    start[0] = 49.86462268679067;
+    start[1] = 8.657507656252882;
     start[2] = 100;
     ob::ScopedState<> goal(space);
     goal[0] = 50.107998827159896;
@@ -94,7 +100,8 @@ void planWithSimpleSetup(std::shared_ptr<PopulationMap> map)
     goal[2] = 100;
     ss.setStartAndGoalStates(start, goal);
 
-    ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, map));
+    std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start[0] - 0.001, start[1] - 0.001, goal[0] + 0.001, goal[1] + 0.001);
+    ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, map, boundaries));
     auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
     ss.setOptimizationObjective(population_objective);
     ss.setPlanner(std::make_shared<og::PRMstar>(si));
@@ -118,6 +125,5 @@ void planWithSimpleSetup(std::shared_ptr<PopulationMap> map)
 int main(int /*argc*/, char** /*argv*/)
 {
     auto pop_map = std::make_shared<PopulationMap>();
-    // planWithSimpleSetup(pop_map);
-    Vector vec = Vector(3);
+    planWithSimpleSetup(pop_map);
 }

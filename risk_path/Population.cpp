@@ -26,7 +26,6 @@ void PopulationMap::transform_array()
 {
     for (int i = 0; i < 6; i++) {
         transform[i] = transformer[i];
-
     }
     check_transform();
 }
