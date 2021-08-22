@@ -76,15 +76,11 @@ public:
     std::shared_ptr<og::SimpleSetup> ss;
     ob::SpaceInformationPtr si;
 
-    PlanningSetup(std::shared_ptr<PopulationMap> map)
+    PlanningSetup()
     {
         space = std::make_shared<ob::RealVectorStateSpace>(3);
         ss = std::make_shared<og::SimpleSetup>(space);
         si = ss->getSpaceInformation();
-
-        
-        auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
-        ss->setOptimizationObjective(population_objective);
         ss->setPlanner(std::make_shared<og::PRMstar>(si));
     }
 
@@ -92,6 +88,12 @@ public:
     {
         std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start_coords[0] - 0.001, start_coords[1] - 0.001, goal_coords[0] + 0.001, goal_coords[1] + 0.001);
         ss->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
+    }
+
+    void set_objective(std::shared_ptr<PopulationMap> map)
+    {
+        auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
+        ss->setOptimizationObjective(population_objective);
     }
 
     void set_boundaries() 
@@ -136,17 +138,21 @@ public:
     }
 };
 
-
-
-int main(int /*argc*/, char** /*argv*/)
+void plan_env_1()
 {
     std::array<double, 3> start_point = { 49.86462268679067, 8.657507656252882, 100 };
     std::array<double, 3> goal_point = { 50.107998827159896, 8.68757388575945, 100 };
     auto pop_map = std::make_shared<PopulationMap>();
 
-    PlanningSetup planner = PlanningSetup(pop_map);
+    PlanningSetup planner = PlanningSetup();
     planner.set_start_goal(start_point, goal_point);
     planner.set_boundaries();
     planner.set_validity_checker(start_point, goal_point);
+    planner.set_objective(pop_map);
     planner.solve();
+}
+
+int main(int /*argc*/, char** /*argv*/)
+{
+    plan_env_1();
 }
