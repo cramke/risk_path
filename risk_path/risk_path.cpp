@@ -67,55 +67,65 @@ public:
     }
 };
 
-void planWithSimpleSetup(std::shared_ptr<PopulationMap> map, std::array<double, 3> start_coords, std::array<double, 3> goal_coords)
+
+class PlanningSetup 
 {
-    auto space = std::make_shared<ob::RealVectorStateSpace>(3);
 
-    ob::RealVectorBounds bounds(3);
-    bounds.setLow(0,49);
-    bounds.setHigh(0,51);
-    bounds.setLow(1,5.86);
-    bounds.setHigh(1,9);
-    bounds.setLow(2,100);
-    bounds.setHigh(2,100);
-    space->setBounds(bounds);
+public:
+    std::shared_ptr<ob::RealVectorStateSpace> space;
 
-    // define a simple setup class
-    og::SimpleSetup ss(space);
-    ob::SpaceInformationPtr si = ss.getSpaceInformation();
-
-    // create a random start / goal state
-    ob::ScopedState<> start_state(space);
-    start_state[0] = start_coords.at(0);
-    start_state[1] = start_coords.at(1);
-    start_state[2] = start_coords.at(2);
-    ob::ScopedState<> goal_state(space);
-    goal_state[0] = goal_coords.at(0);
-    goal_state[1] = goal_coords.at(1);
-    goal_state[2] = goal_coords.at(2);
-    ss.setStartAndGoalStates(start_state, goal_state);
-
-    std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start_state[0] - 0.001, start_state[1] - 0.001, goal_state[0] + 0.001, goal_state[1] + 0.001);
-    ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
-    auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
-    ss.setOptimizationObjective(population_objective);
-    ss.setPlanner(std::make_shared<og::PRMstar>(si));
-
-    // this call is optional, but we put it in to get more output information
-    ss.setup();
-    ss.print();
-
-    const int PLANNING_TIME = 1;
-    ob::PlannerStatus solved = ss.solve(PLANNING_TIME);
-
-    if (solved)
+    PlanningSetup(std::shared_ptr<PopulationMap> map, std::array<double, 3> start_coords, std::array<double, 3> goal_coords)
     {
-        std::cout << "Found solution:" << std::endl;
-        ss.getSolutionPath().print(std::cout);
+        space = std::make_shared<ob::RealVectorStateSpace>(3);
+        this->set_boundaries();
+
+        og::SimpleSetup ss(space);
+        ob::SpaceInformationPtr si = ss.getSpaceInformation();
+        ob::ScopedState<> start_state(space);
+        start_state[0] = start_coords.at(0);
+        start_state[1] = start_coords.at(1);
+        start_state[2] = start_coords.at(2);
+        ob::ScopedState<> goal_state(space);
+        goal_state[0] = goal_coords.at(0);
+        goal_state[1] = goal_coords.at(1);
+        goal_state[2] = goal_coords.at(2);
+        ss.setStartAndGoalStates(start_state, goal_state);
+
+        std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start_state[0] - 0.001, start_state[1] - 0.001, goal_state[0] + 0.001, goal_state[1] + 0.001);
+        ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
+        auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
+        ss.setOptimizationObjective(population_objective);
+        ss.setPlanner(std::make_shared<og::PRMstar>(si));
+
+        // this call is optional, but we put it in to get more output information
+        ss.setup();
+        ss.print();
+
+        const int PLANNING_TIME = 1;
+        ob::PlannerStatus solved = ss.solve(PLANNING_TIME);
+        if (solved)
+        {
+            std::cout << "Found solution:" << std::endl;
+            ss.getSolutionPath().print(std::cout);
+        }
+        else
+            std::cout << "No solution found" << std::endl;
     }
-    else
-        std::cout << "No solution found" << std::endl;
-}
+
+    void set_boundaries() 
+    {
+        ob::RealVectorBounds bounds(3);
+        bounds.setLow(0, 49);
+        bounds.setHigh(0, 51);
+        bounds.setLow(1, 5.86);
+        bounds.setHigh(1, 9);
+        bounds.setLow(2, 100);
+        bounds.setHigh(2, 100);
+        space->setBounds(bounds);
+    }
+};
+
+
 
 int main(int /*argc*/, char** /*argv*/)
 {
@@ -123,5 +133,5 @@ int main(int /*argc*/, char** /*argv*/)
     std::array<double, 3> goal_point = { 50.107998827159896, 8.68757388575945, 100 };
     auto pop_map = std::make_shared<PopulationMap>();
 
-    planWithSimpleSetup(pop_map, start_point, goal_point);
+    PlanningSetup planner = PlanningSetup(pop_map, start_point, goal_point);
 }
