@@ -22,24 +22,19 @@ namespace bg = boost::geometry;
 class ProjectValidityChecker : public ob::StateValidityChecker
 {
 private:
-    std::shared_ptr<PopulationMap> map;
     std::shared_ptr<Vector> boundaries;
 
 public:
 
-    ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<PopulationMap> map_given, std::shared_ptr<Vector> bounds) : ob::StateValidityChecker(si)
+    ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<Vector> bounds) : ob::StateValidityChecker(si)
     {
-        map = map_given;
         boundaries = bounds;
     }
 
     bool isValid(const ob::State* state) const override
     {
         const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-        double lat = pos[0];
-        double lon = pos[1];
-        Coordinates point = Coordinates(lat, lon, map);
-        bool valid = boundaries->within(point.lat, point.lon);
+        bool valid = boundaries->within(pos[0], pos[1]);
         return valid;
     }
 };
@@ -101,7 +96,7 @@ void planWithSimpleSetup(std::shared_ptr<PopulationMap> map)
     ss.setStartAndGoalStates(start, goal);
 
     std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start[0] - 0.001, start[1] - 0.001, goal[0] + 0.001, goal[1] + 0.001);
-    ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, map, boundaries));
+    ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
     auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
     ss.setOptimizationObjective(population_objective);
     ss.setPlanner(std::make_shared<og::PRMstar>(si));
