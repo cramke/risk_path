@@ -67,7 +67,7 @@ public:
     }
 };
 
-void planWithSimpleSetup(std::shared_ptr<PopulationMap> map)
+void planWithSimpleSetup(std::shared_ptr<PopulationMap> map, std::array<double, 3> start_coords, std::array<double, 3> goal_coords)
 {
     auto space = std::make_shared<ob::RealVectorStateSpace>(3);
 
@@ -85,17 +85,17 @@ void planWithSimpleSetup(std::shared_ptr<PopulationMap> map)
     ob::SpaceInformationPtr si = ss.getSpaceInformation();
 
     // create a random start / goal state
-    ob::ScopedState<> start(space);
-    start[0] = 49.86462268679067;
-    start[1] = 8.657507656252882;
-    start[2] = 100;
-    ob::ScopedState<> goal(space);
-    goal[0] = 50.107998827159896;
-    goal[1] = 8.68757388575945;
-    goal[2] = 100;
-    ss.setStartAndGoalStates(start, goal);
+    ob::ScopedState<> start_state(space);
+    start_state[0] = start_coords.at(0);
+    start_state[1] = start_coords.at(1);
+    start_state[2] = start_coords.at(2);
+    ob::ScopedState<> goal_state(space);
+    goal_state[0] = goal_coords.at(0);
+    goal_state[1] = goal_coords.at(1);
+    goal_state[2] = goal_coords.at(2);
+    ss.setStartAndGoalStates(start_state, goal_state);
 
-    std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start[0] - 0.001, start[1] - 0.001, goal[0] + 0.001, goal[1] + 0.001);
+    std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start_state[0] - 0.001, start_state[1] - 0.001, goal_state[0] + 0.001, goal_state[1] + 0.001);
     ss.setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
     auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
     ss.setOptimizationObjective(population_objective);
@@ -119,6 +119,9 @@ void planWithSimpleSetup(std::shared_ptr<PopulationMap> map)
 
 int main(int /*argc*/, char** /*argv*/)
 {
+    std::array<double, 3> start_point = { 49.86462268679067, 8.657507656252882, 100 };
+    std::array<double, 3> goal_point = { 50.107998827159896, 8.68757388575945, 100 };
     auto pop_map = std::make_shared<PopulationMap>();
-    planWithSimpleSetup(pop_map);
+
+    planWithSimpleSetup(pop_map, start_point, goal_point);
 }
