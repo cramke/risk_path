@@ -7,6 +7,9 @@
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 BOOST_GEOMETRY_REGISTER_C_ARRAY_CS(cs::cartesian)
 
 namespace bg = boost::geometry;
@@ -20,4 +23,11 @@ class Vector
 public:
 	Vector(double ax, double ay, double bx, double by);
 	bool within(double lat, double lon);
+};
+
+class GeoJsonReader
+{
+	std::string path;
+public:
+	GeoJsonReader();
 };

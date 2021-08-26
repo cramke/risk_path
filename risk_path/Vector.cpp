@@ -12,3 +12,12 @@ bool Vector::within(double lat, double lon)
 	return bg::within(p, poly);
 }
 
+
+GeoJsonReader::GeoJsonReader()
+{
+	path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/maps/test.geojson";
+	boost::property_tree::ptree root;
+	boost::property_tree::read_json(path, root);
+
+
+}
