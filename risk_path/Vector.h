@@ -18,6 +18,8 @@ namespace bg = boost::geometry;
 
 typedef bg::model::d2::point_xy<double> point;
 typedef bg::model::polygon<point> polygon;
+typedef bg::model::box<point> box;
+typedef std::pair<box, unsigned> value;
 
 class Vector
 {
@@ -30,7 +32,8 @@ public:
 class RTree
 {
 public:
-	RTree();
+	bg::index::rtree< value, bg::index::rstar<16, 4> > rtree;
+	RTree(std::vector<polygon> polygons);
 };
 
 class GeoJsonReader

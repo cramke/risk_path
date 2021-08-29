@@ -12,15 +12,18 @@ bool Vector::within(double lat, double lon)
 	return bg::within(p, poly);
 }
 
-RTree::RTree()
+RTree::RTree(std::vector<polygon> polygons)
 {
-	GeoJsonReader reader = GeoJsonReader();
-	polygon poly = reader.get_polygon();
-	typedef bg::model::box<polygon> box;
-	typedef std::pair<box, unsigned> value;
-	bg::index::rtree<value, bg::index::quadratic<16> > rtree;
-
-
+	int id = 0;
+	for (polygon poly : polygons)
+	{
+		box b = bg::return_envelope<box>(poly);
+		auto pair = std::make_pair(b, id);
+		rtree.insert(pair);
+		id++;
+		
+	}
+	
 };
 
 
