@@ -9,7 +9,6 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
 #include <boost/multi_array.hpp>
 
 BOOST_GEOMETRY_REGISTER_C_ARRAY_CS(cs::cartesian)
@@ -20,14 +19,6 @@ typedef bg::model::d2::point_xy<double> point;
 typedef bg::model::polygon<point> polygon;
 typedef bg::model::box<point> box;
 typedef std::pair<box, unsigned> value;
-
-class Vector
-{
-	polygon poly;
-public:
-	Vector(double ax, double ay, double bx, double by);
-	bool within(double lat, double lon);
-};
 
 class RTree
 {
