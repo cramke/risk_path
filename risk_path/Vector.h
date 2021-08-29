@@ -34,6 +34,7 @@ class RTree
 public:
 	bg::index::rtree< value, bg::index::rstar<16, 4> > rtree;
 	RTree(std::vector<polygon> polygons);
+	bool check_point(double lat, double lon);
 };
 
 class GeoJsonReader

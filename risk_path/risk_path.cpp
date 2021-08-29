@@ -4,8 +4,16 @@ class ProjectValidityChecker : public ob::StateValidityChecker
 {
 private:
     std::shared_ptr<Vector> boundaries;
+    std::shared_ptr<RTree> rtree;
+    bool use_rtree = false;
 
 public:
+
+    ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<RTree> rtree_ptr) : ob::StateValidityChecker(si)
+    {
+        rtree = rtree_ptr;
+        use_rtree = true;
+    }
 
     ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<Vector> bounds) : ob::StateValidityChecker(si)
     {
@@ -14,6 +22,17 @@ public:
 
     bool isValid(const ob::State* state) const override
     {
+        if (use_rtree)
+        {
+            const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
+            bool valid = rtree->check_point(pos[0], pos[1]);
+            if (valid) { return true; }
+            else
+            {
+                std::cout << "Point invalid!" << std::endl;
+                return false;
+            }
+        }
         const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
         bool valid = boundaries->within(pos[0], pos[1]);
         return valid;
@@ -69,6 +88,14 @@ public:
     {
         std::shared_ptr<Vector> boundaries = std::make_shared<Vector>(start_coords[0] - 0.001, start_coords[1] - 0.001, goal_coords[0] + 0.001, goal_coords[1] + 0.001);
         ss->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, boundaries));
+    }
+
+    void set_validity_checker()
+    {
+        GeoJsonReader reader = GeoJsonReader();
+        auto polys = reader.get_polygons();
+        std::shared_ptr<RTree> rtree = std::make_shared<RTree>(polys);
+        ss->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, rtree));
     }
 
     void set_objective(std::shared_ptr<PopulationMap> map)

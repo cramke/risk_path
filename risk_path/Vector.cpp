@@ -21,10 +21,23 @@ RTree::RTree(std::vector<polygon> polygons)
 		auto pair = std::make_pair(b, id);
 		rtree.insert(pair);
 		id++;
-	}
-	
-};
+	}	
+}
 
+bool RTree::check_point(double lat, double lon)
+{
+	std::vector<value> result;
+	point p(lon, lat);
+	rtree.query(bg::index::contains(p), std::back_inserter(result));
+	if (result.empty())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 GeoJsonReader::GeoJsonReader()
 {
