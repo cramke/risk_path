@@ -21,7 +21,6 @@ RTree::RTree(std::vector<polygon> polygons)
 		auto pair = std::make_pair(b, id);
 		rtree.insert(pair);
 		id++;
-		
 	}
 	
 };

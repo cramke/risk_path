@@ -18,5 +18,20 @@ void plan_env_1()
 
 int main(int /*argc*/, char** /*argv*/)
 {
-    RTree rtree = RTree();
+    GeoJsonReader reader = GeoJsonReader();
+    auto polys = reader.get_polygons();
+    RTree rtree = RTree(polys);
+
+    box query_box(point(0, 0), point(60, 60));
+    std::vector<value> result;
+    rtree.rtree.query(bg::index::contains(point(8.660146140, 49.884646188)), std::back_inserter(result));
+    if (result.empty())
+    {
+        std::cout << "Valid State" << std::endl;
+    }
+    else
+    {
+        std::cout << "Invalid State" << std::endl;
+        std::cout << "Intersections with: " << result.size() << std::endl;
+    }
 }
