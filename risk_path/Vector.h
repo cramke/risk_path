@@ -9,6 +9,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
+#include <boost/multi_array.hpp>
 
 BOOST_GEOMETRY_REGISTER_C_ARRAY_CS(cs::cartesian)
 
@@ -25,9 +27,17 @@ public:
 	bool within(double lat, double lon);
 };
 
+class RTree
+{
+public:
+	RTree();
+};
+
 class GeoJsonReader
 {
 	std::string path;
+	boost::property_tree::ptree root;
 public:
 	GeoJsonReader();
+	std::vector<polygon> get_polygons();
 };

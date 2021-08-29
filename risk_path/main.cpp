@@ -18,5 +18,5 @@ void plan_env_1()
 
 int main(int /*argc*/, char** /*argv*/)
 {
-    GeoJsonReader reader = GeoJsonReader();
+    RTree rtree = RTree();
 }

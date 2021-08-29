@@ -12,12 +12,49 @@ bool Vector::within(double lat, double lon)
 	return bg::within(p, poly);
 }
 
+RTree::RTree()
+{
+	GeoJsonReader reader = GeoJsonReader();
+	polygon poly = reader.get_polygon();
+	typedef bg::model::box<polygon> box;
+	typedef std::pair<box, unsigned> value;
+	bg::index::rtree<value, bg::index::quadratic<16> > rtree;
+
+
+};
+
 
 GeoJsonReader::GeoJsonReader()
 {
 	path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/maps/test.geojson";
-	boost::property_tree::ptree root;
 	boost::property_tree::read_json(path, root);
+}
 
-
+std::vector<polygon> GeoJsonReader::get_polygons()
+{
+	std::vector<polygon> polygons;
+	for (auto& feature : root.get_child("features"))
+	{
+		polygon poly;
+		std::vector<point> polygon_vector;
+		for (auto& fourth : feature.second.get_child("geometry.coordinates"))
+		{
+			for (auto& third : fourth.second)
+			{
+				for (auto& row : third.second)
+				{
+					std::vector<double> point_vector;
+					for (auto& cell : row.second)
+					{
+						point_vector.push_back(std::stod(cell.second.data()));
+					}
+					point p1(point_vector[0], point_vector[1]);
+					polygon_vector.push_back(p1);
+				}
+			}
+		}
+		bg::assign_points(poly, polygon_vector);
+		polygons.push_back(poly);
+	}
+	return polygons;
 }
