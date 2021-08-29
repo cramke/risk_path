@@ -22,6 +22,7 @@ public:
     void close();
     bool check_transform();
     double read_population_from_indexes(int x, int y) const;
+    // double read_propulation_from_point(Coordinates point);
     std::tuple<double, double, double, double> get_spatial_bounds() const;
     bool check_map_bounds(double lat, double lon) const;
 };

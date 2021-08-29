@@ -74,11 +74,6 @@ bool PopulationMap::check_map_bounds(double lat, double lon) const {
 }
 
 
-
-
-
-
-
 Coordinates::Coordinates(int x_given, int y_given, std::shared_ptr<PopulationMap> map_given)
 {
     transform = map_given->transform;
