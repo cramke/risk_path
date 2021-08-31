@@ -31,9 +31,8 @@ private:
     std::shared_ptr<PopulationMap> map;
 
 public:
-    CustomOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<PopulationMap> map_given) : ob::OptimizationObjective(si)
+    CustomOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<PopulationMap> map_given) : ob::OptimizationObjective(si), map(map_given)
     {
-        map = map_given;
     }
 
     ob::Cost stateCost(const ob::State* state) const override
