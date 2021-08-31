@@ -24,7 +24,8 @@ PopulationMap::PopulationMap() {
 
 void PopulationMap::transform_array()
 {
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) 
+    {
         transform[i] = transformer[i];
     }
     check_transform();
@@ -47,7 +48,8 @@ bool PopulationMap::check_transform()
     {
         return true;
     }
-    else {
+    else 
+    {
         return false;
     }
 }
@@ -65,10 +67,12 @@ bool PopulationMap::check_map_bounds(double lat, double lon) const {
     if (lat > std::get<0>(bounds) &&
         lat < std::get<1>(bounds) &&
         lon > std::get<2>(bounds) &&
-        lon < std::get<3>(bounds)) {
+        lon < std::get<3>(bounds)) 
+    {
         return true;
     }
-    else {
+    else 
+    {
         return false;
     }
 }

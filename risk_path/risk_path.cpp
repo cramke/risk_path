@@ -39,17 +39,22 @@ public:
     ob::Cost stateCost(const ob::State* state) const override
     {
         const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-        double lat = pos[0];
-        double lon = pos[1];
-        Coordinates point = Coordinates(lat, lon, map);
-
+        Coordinates point = Coordinates(pos[0], pos[1], map);
         double cost_value = map->read_population_from_indexes(point.x, point.y);
         return ob::Cost(cost_value);
     }
 
     ob::Cost motionCost(const ob::State* s1, const ob::State* s2) const override
     {
-        return ob::Cost(1.0);
+        const double* pos = s1->as<ob::RealVectorStateSpace::StateType>()->values;
+        Coordinates point1 = Coordinates(pos[0], pos[1], map);
+        double cost_value1 = map->read_population_from_indexes(point1.x, point1.y);
+
+        const double* pos2 = s2->as<ob::RealVectorStateSpace::StateType>()->values;
+        Coordinates point2 = Coordinates(pos2[0], pos[1], map);
+        double cost_value2 = map->read_population_from_indexes(point2.x, point2.y);
+
+        return ob::Cost(cost_value1 + cost_value2);
     }
 };
 
@@ -64,6 +69,7 @@ public:
     PlanningSetup()
     {
         space = std::make_shared<ob::RealVectorStateSpace>(3);
+        space->setLongestValidSegmentFraction(0.005);
         ss = std::make_shared<og::SimpleSetup>(space);
         si = ss->getSpaceInformation();
         ss->setPlanner(std::make_shared<og::PRMstar>(si));
@@ -80,6 +86,7 @@ public:
     void set_objective(std::shared_ptr<PopulationMap> map)
     {
         auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
+        std::cout << map->transform[1] << std::endl;
         ss->setOptimizationObjective(population_objective);
     }
 
@@ -88,7 +95,7 @@ public:
         ob::RealVectorBounds bounds(3);
         bounds.setLow(0, 49);
         bounds.setHigh(0, 51);
-        bounds.setLow(1, 5.86);
+        bounds.setLow(1, 5.868);
         bounds.setHigh(1, 9);
         bounds.setLow(2, 100);
         bounds.setHigh(2, 100);
@@ -113,6 +120,13 @@ public:
         // this call is optional, but we put it in to get more output information
         ss->setup();
         ss->print();
+
+        auto planner = ss->getPlanner();
+        planner->printProperties(std::cout);
+        planner->printSettings(std::cout);
+        double long_segment = space->getLongestValidSegmentLength();
+        double long_fraction = space->getLongestValidSegmentFraction();
+
         const int PLANNING_TIME = 1;
         ob::PlannerStatus solved = ss->solve(PLANNING_TIME);
         if (solved)
