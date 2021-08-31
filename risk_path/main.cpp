@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "risk_path.cpp"
+#include "risk_path.h"
 
 void plan_env_1()
 {
