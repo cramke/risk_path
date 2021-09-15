@@ -27,10 +27,10 @@ bool RTree::check_point(double lat, double lon)
 	}
 }
 
-GeoJsonReader::GeoJsonReader()
+GeoJsonReader::GeoJsonReader(std::string path)
 {
-	path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/maps/test.geojson";
 	boost::property_tree::read_json(path, root);
+	std::cout << "Completed Loading Vector File" << std::endl;
 }
 
 std::vector<polygon> GeoJsonReader::get_polygons()
@@ -44,16 +44,15 @@ std::vector<polygon> GeoJsonReader::get_polygons()
 		{
 			for (auto& third : fourth.second)
 			{
-				for (auto& row : third.second)
-				{
+			
 					std::vector<double> point_vector;
-					for (auto& cell : row.second)
+					for (auto& cell : third.second)
 					{
 						point_vector.push_back(std::stod(cell.second.data()));
 					}
 					point p1(point_vector[0], point_vector[1]);
 					polygon_vector.push_back(p1);
-				}
+				
 			}
 		}
 		bg::assign_points(poly, polygon_vector);

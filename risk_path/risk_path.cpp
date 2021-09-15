@@ -53,9 +53,9 @@ PlanningSetup::PlanningSetup()
     ss->setPlanner(std::make_shared<og::PRMstar>(si));
 }
 
-void PlanningSetup::set_validity_checker()
+void PlanningSetup::set_validity_checker(std::string path)
 {
-    GeoJsonReader reader = GeoJsonReader();
+    GeoJsonReader reader = GeoJsonReader(path);
     auto polys = reader.get_polygons();
     std::shared_ptr<RTree> rtree = std::make_shared<RTree>(polys);
     ss->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, rtree));

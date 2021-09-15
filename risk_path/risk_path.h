@@ -37,7 +37,7 @@ public:
     ob::SpaceInformationPtr si;
 
     PlanningSetup();
-    void set_validity_checker();
+    void set_validity_checker(std::string);
     void set_objective(std::shared_ptr<PopulationMap> map);
     void set_boundaries();
     void set_start_goal(std::array<double, 3> start_coords, std::array<double, 3> goal_coords);
