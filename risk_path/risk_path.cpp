@@ -8,13 +8,9 @@ ProjectValidityChecker::ProjectValidityChecker(const ob::SpaceInformationPtr& si
 bool ProjectValidityChecker::isValid(const ob::State* state) const
 {
     const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-    bool valid = rtree->check_point(pos[0], pos[1]);
-    if (valid) { return true; }
-    else
-    {
-        std::cout << "Point invalid!" << std::endl;
-        return false;
-    }
+    bool is_point_valid = rtree->check_point(pos[0], pos[1]);
+    if (is_point_valid) return true;
+    else return false;
 }
 
 
@@ -112,6 +108,5 @@ void PlanningSetup::solve()
         std::cout << "Found solution:" << std::endl;
         ss->getSolutionPath().print(std::cout);
     }
-    else
-        std::cout << "No solution found" << std::endl;
+    else std::cout << "No solution found" << std::endl;
 }
