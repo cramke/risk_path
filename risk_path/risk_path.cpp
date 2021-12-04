@@ -39,6 +39,24 @@ ob::Cost CustomOptimizationObjective::motionCost(const ob::State* s1, const ob::
     return ob::Cost(cost_value1 + cost_value2);
 }
 
+RTreeOptimizationObjective::RTreeOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<RTree> rtree) : ob::OptimizationObjective(si), rtree(rtree)
+{
+}
+
+ob::Cost RTreeOptimizationObjective::stateCost(const ob::State* state) const
+{
+    const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
+    double state_cost = rtree->nearest_point_cost(pos[0], pos[1]);
+    return ob::Cost(state_cost);
+}
+
+ob::Cost RTreeOptimizationObjective::motionCost(const ob::State* s1, const ob::State* s2) const
+{
+    const double* pos1 = s1->as<ob::RealVectorStateSpace::StateType>()->values;
+    const double* pos2 = s2->as<ob::RealVectorStateSpace::StateType>()->values;
+    double cost = rtree->buffered_line_cost(pos1, pos2);
+    return ob::Cost(cost);
+}
 
 PlanningSetup::PlanningSetup()
 {
@@ -61,6 +79,12 @@ void PlanningSetup::set_objective(std::shared_ptr<PopulationMap> map)
 {
     auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
     std::cout << map->transform[1] << std::endl;
+    ss->setOptimizationObjective(population_objective);
+}
+
+void PlanningSetup::set_rtee_objective(std::shared_ptr<RTree> rtree)
+{
+    auto population_objective = std::make_shared<RTreeOptimizationObjective>(si, rtree);
     ss->setOptimizationObjective(population_objective);
 }
 
@@ -101,7 +125,7 @@ void PlanningSetup::solve()
     double long_segment = space->getLongestValidSegmentLength();
     double long_fraction = space->getLongestValidSegmentFraction();
 
-    const int PLANNING_TIME = 1;
+    const int PLANNING_TIME = 3;
     ob::PlannerStatus solved = ss->solve(PLANNING_TIME);
     if (solved)
     {
@@ -110,3 +134,5 @@ void PlanningSetup::solve()
     }
     else std::cout << "No solution found" << std::endl;
 }
+
+

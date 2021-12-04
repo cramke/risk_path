@@ -19,7 +19,7 @@ BOOST_GEOMETRY_REGISTER_C_ARRAY_CS(cs::cartesian)
 typedef bg::model::d2::point_xy<double> point;
 typedef bg::model::polygon<point> polygon;
 typedef bg::model::box<point> box;
-typedef std::pair<box, unsigned> value;
+typedef std::pair<box, unsigned> value; 
 
 struct population_point
 {
@@ -37,6 +37,9 @@ public:
 	RTree(std::vector<polygon> polygons);
 	RTree(std::vector<population_point> points);
 	bool check_point(double lat, double lon);
+	double nearest_point_cost(double lat, double lon);
+	double buffered_line_cost(const double* pos1, const double* pos2);
+
 };
 
 class GeoJsonReader
