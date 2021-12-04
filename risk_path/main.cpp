@@ -2,6 +2,14 @@
 #include <iostream>
 #include "risk_path.h"
 
+void load_points()
+{
+    const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/ghs_pop_random_sample_points.geojson";
+    GeoJsonReader reader = GeoJsonReader(filename);
+    auto points = reader.get_points();
+    std::shared_ptr<RTree> rtree = std::make_shared<RTree>(points);
+}
+
 void plan_env_1()
 {
     std::array<double, 3> start_point = { 49.86462268679067, 8.657507656252882, 100 };
@@ -19,5 +27,5 @@ void plan_env_1()
 
 int main(int /*argc*/, char** /*argv*/)
 {
-    plan_env_1();
+    load_points();
 }
