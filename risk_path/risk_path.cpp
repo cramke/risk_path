@@ -13,51 +13,6 @@ bool ProjectValidityChecker::isValid(const ob::State* state) const
     else return false;
 }
 
-
-CustomOptimizationObjective::CustomOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<PopulationMap> map_given) : ob::OptimizationObjective(si), map(map_given)
-{
-}
-
-ob::Cost CustomOptimizationObjective::stateCost(const ob::State* state) const
-{
-    const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-    Coordinates point = Coordinates(pos[0], pos[1], map);
-    double cost_value = map->read_population_from_indexes(point.x, point.y);
-    return ob::Cost(cost_value);
-}
-
-ob::Cost CustomOptimizationObjective::motionCost(const ob::State* s1, const ob::State* s2) const
-{
-    const double* pos = s1->as<ob::RealVectorStateSpace::StateType>()->values;
-    Coordinates point1 = Coordinates(pos[0], pos[1], map);
-    double cost_value1 = map->read_population_from_indexes(point1.x, point1.y);
-
-    const double* pos2 = s2->as<ob::RealVectorStateSpace::StateType>()->values;
-    Coordinates point2 = Coordinates(pos2[0], pos[1], map);
-    double cost_value2 = map->read_population_from_indexes(point2.x, point2.y);
-
-    return ob::Cost(cost_value1 + cost_value2);
-}
-
-RTreeOptimizationObjective::RTreeOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<RTree> rtree) : ob::OptimizationObjective(si), rtree(rtree)
-{
-}
-
-ob::Cost RTreeOptimizationObjective::stateCost(const ob::State* state) const
-{
-    const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-    double state_cost = rtree->nearest_point_cost(pos[0], pos[1]);
-    return ob::Cost(state_cost);
-}
-
-ob::Cost RTreeOptimizationObjective::motionCost(const ob::State* s1, const ob::State* s2) const
-{
-    const double* pos1 = s1->as<ob::RealVectorStateSpace::StateType>()->values;
-    const double* pos2 = s2->as<ob::RealVectorStateSpace::StateType>()->values;
-    double cost = rtree->buffered_line_cost(pos1, pos2);
-    return ob::Cost(cost);
-}
-
 PlanningSetup::PlanningSetup()
 {
     space = std::make_shared<ob::RealVectorStateSpace>(3);
@@ -67,7 +22,7 @@ PlanningSetup::PlanningSetup()
     ss->setPlanner(std::make_shared<og::PRMstar>(si));
 }
 
-void PlanningSetup::set_validity_checker(std::string path)
+void PlanningSetup::set_validity_checker(const char* path)
 {
     GeoJsonReader reader = GeoJsonReader(path);
     auto polys = reader.get_polygons();
@@ -78,7 +33,6 @@ void PlanningSetup::set_validity_checker(std::string path)
 void PlanningSetup::set_objective(std::shared_ptr<PopulationMap> map)
 {
     auto population_objective = std::make_shared<CustomOptimizationObjective>(si, map);
-    std::cout << map->transform[1] << std::endl;
     ss->setOptimizationObjective(population_objective);
 }
 
@@ -134,5 +88,3 @@ void PlanningSetup::solve()
     }
     else std::cout << "No solution found" << std::endl;
 }
-
-

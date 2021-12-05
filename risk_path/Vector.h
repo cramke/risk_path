@@ -27,19 +27,18 @@ struct population_point
 	double population;
 };
 
-BOOST_GEOMETRY_REGISTER_POINT_2D(population_point, double, bg::cs::cartesian, lon, lat)
-
+BOOST_GEOMETRY_REGISTER_POINT_2D(population_point, double, cs::cartesian, lon, lat)
 
 class RTree
 {
 public:
 	bg::index::rtree<value, bg::index::rstar<16, 4>> rtree;
+	bg::index::rtree<population_point, bg::index::rstar<16, 4>> rtree_double;
 	RTree(std::vector<polygon> polygons);
 	RTree(std::vector<population_point> points);
 	bool check_point(double lat, double lon);
 	double nearest_point_cost(double lat, double lon);
 	double buffered_line_cost(const double* pos1, const double* pos2);
-
 };
 
 class GeoJsonReader

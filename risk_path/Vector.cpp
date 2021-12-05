@@ -17,9 +17,7 @@ RTree::RTree(std::vector<population_point> points)
 {
 	for (population_point point : points)
 	{
-		box b = bg::return_envelope<box>(point);
-		auto pair = std::make_pair(b, point.population);
-		rtree.insert(pair);
+		rtree_double.insert(point);
 	}
 }
 
@@ -28,22 +26,16 @@ bool RTree::check_point(double lat, double lon)
 	std::vector<value> result;
 	point p(lon, lat);
 	rtree.query(bg::index::contains(p), std::back_inserter(result));
-	if (result.empty())
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	if (result.empty()) return true;
+	else return false;
 }
 
 double RTree::nearest_point_cost(double lat, double lon)
 {
 	point p(lon, lat); 
-	std::vector<std::pair<box, double>> result; 
-	rtree.query(bg::index::nearest(p, 1), std::back_inserter(result));
-	return result[0].second;
+	std::vector<population_point> result;
+	rtree_double.query(bg::index::nearest(p, 1), std::back_inserter(result));
+	return result[0].population;
 }
 
 double RTree::buffered_line_cost(const double* pos1, const double* pos2)
