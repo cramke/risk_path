@@ -1,6 +1,6 @@
 #include "risk_path.h"
 
-ProjectValidityChecker::ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<RTree> rtree_ptr) : ob::StateValidityChecker(si)
+ProjectValidityChecker::ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<RTreeBox> rtree_ptr) : ob::StateValidityChecker(si)
 {
     rtree = rtree_ptr;
 }
@@ -26,7 +26,7 @@ void PlanningSetup::set_validity_checker(const char* path)
 {
     GeoJsonReader reader = GeoJsonReader(path);
     auto polys = reader.get_polygons();
-    std::shared_ptr<RTree> rtree = std::make_shared<RTree>(polys);
+    std::shared_ptr<RTreeBox> rtree = std::make_shared<RTreeBox>(polys);
     ss->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, rtree));
 }
 
@@ -36,7 +36,7 @@ void PlanningSetup::set_objective(std::shared_ptr<PopulationMap> map)
     ss->setOptimizationObjective(population_objective);
 }
 
-void PlanningSetup::set_rtee_objective(std::shared_ptr<RTree> rtree)
+void PlanningSetup::set_rtee_objective(std::shared_ptr<RTreeBox> rtree)
 {
     auto population_objective = std::make_shared<RTreeOptimizationObjective>(si, rtree);
     ss->setOptimizationObjective(population_objective);

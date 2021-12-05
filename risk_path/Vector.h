@@ -21,21 +21,21 @@ typedef bg::model::polygon<point> polygon;
 typedef bg::model::box<point> box;
 typedef std::pair<box, unsigned> value; 
 
-struct population_point
+struct point_with_double
 {
 	double lon, lat;
 	double population;
 };
 
-BOOST_GEOMETRY_REGISTER_POINT_2D(population_point, double, cs::cartesian, lon, lat)
+BOOST_GEOMETRY_REGISTER_POINT_2D(point_with_double, double, cs::cartesian, lon, lat)
 
-class RTree
+class RTreeBox
 {
 public:
 	bg::index::rtree<value, bg::index::rstar<16, 4>> rtree;
-	bg::index::rtree<population_point, bg::index::rstar<16, 4>> rtree_double;
-	RTree(std::vector<polygon> polygons);
-	RTree(std::vector<population_point> points);
+	bg::index::rtree<point_with_double, bg::index::rstar<16, 4>> rtree_double;
+	RTreeBox(std::vector<polygon> polygons);
+	RTreeBox(std::vector<point_with_double> points);
 	bool check_point(double lat, double lon);
 	double nearest_point_cost(double lat, double lon);
 	double buffered_line_cost(const double* pos1, const double* pos2);
@@ -49,5 +49,5 @@ public:
 	GeoJsonReader(std::string);
 	GeoJsonReader(const char*);
 	std::vector<polygon> get_polygons();
-	std::vector<population_point> get_points();
+	std::vector<point_with_double> get_points();
 };

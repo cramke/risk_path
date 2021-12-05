@@ -15,7 +15,7 @@ void plan_env_pop_rtree()
     const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/ghs_pop_random_sample_points.geojson";
     GeoJsonReader reader = GeoJsonReader(filename);
     auto points = reader.get_points();
-    std::shared_ptr<RTree> rtree = std::make_shared<RTree>(points);
+    std::shared_ptr<RTreeBox> rtree = std::make_shared<RTreeBox>(points);
     planner.set_rtee_objective(rtree);
 
     const char* path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/test.geojson";
