@@ -13,14 +13,6 @@ RTreeBox::RTreeBox(std::vector<polygon> polygons)
 	}	
 }
 
-RTreeBox::RTreeBox(std::vector<point_with_double> points) 
-{
-	for (const point_with_double& point : points)
-	{
-		rtree_double.insert(point);
-	}
-}
-
 bool RTreeBox::check_point(double lat, double lon)
 {
 	std::vector<value> result;
@@ -28,42 +20,6 @@ bool RTreeBox::check_point(double lat, double lon)
 	rtree.query(bg::index::contains(p), std::back_inserter(result));
 	if (result.empty()) return true;
 	else return false;
-}
-
-double RTreeBox::nearest_point_cost(double lat, double lon)
-{
-	point p(lon, lat); 
-	std::vector<point_with_double> result;
-	rtree_double.query(bg::index::nearest(p, 1), std::back_inserter(result));
-	return result[0].population;
-}
-
-double RTreeBox::buffered_line_cost(const double* pos1, const double* pos2)
-{
-	point p1(pos1[1], pos1[0]);
-	point p2(pos2[1], pos1[0]);
-	bg::model::linestring<point> line{p1, p2};
-
-	const double buffer_distance = 0.005;
-	const int points_per_circle = 8;
-	boost::geometry::strategy::buffer::distance_symmetric<double> distance_strategy(buffer_distance);
-	boost::geometry::strategy::buffer::join_round join_strategy(points_per_circle);
-	boost::geometry::strategy::buffer::end_round end_strategy(points_per_circle);
-	boost::geometry::strategy::buffer::point_circle circle_strategy(points_per_circle);
-	boost::geometry::strategy::buffer::side_straight side_strategy;
-
-	bg::model::multi_polygon<polygon> buffered_line;
-	bg::buffer(line, buffered_line, distance_strategy, side_strategy,
-		join_strategy, end_strategy, circle_strategy);
-
-	std::vector<point_with_double> result;
-
-	rtree_double.query(bg::index::intersects(buffered_line), std::back_inserter(result));
-	double cost = std::accumulate(result.begin(),
-			result.end(),
-			0.0,
-			[](double sum, const point_with_double& curr) {return sum + curr.population; });
-	return cost;
 }
 
 GeoJsonReader::GeoJsonReader(const char* path)

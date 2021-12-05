@@ -33,12 +33,8 @@ class RTreeBox
 {
 public:
 	bg::index::rtree<value, bg::index::rstar<16, 4>> rtree;
-	bg::index::rtree<point_with_double, bg::index::rstar<16, 4>> rtree_double;
 	RTreeBox(std::vector<polygon> polygons);
-	RTreeBox(std::vector<point_with_double> points);
 	bool check_point(double lat, double lon);
-	double nearest_point_cost(double lat, double lon);
-	double buffered_line_cost(const double* pos1, const double* pos2);
 };
 
 class RTreePoint
