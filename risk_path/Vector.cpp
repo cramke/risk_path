@@ -83,7 +83,6 @@ std::vector<polygon> GeoJsonReader::get_polygons()
 		{
 			for (auto& third : fourth.second)
 			{
-			
 					std::vector<double> point_vector;
 					for (auto& cell : third.second)
 					{
@@ -91,7 +90,6 @@ std::vector<polygon> GeoJsonReader::get_polygons()
 					}
 					point p1(point_vector[0], point_vector[1]);
 					polygon_vector.push_back(p1);
-				
 			}
 		}
 		bg::assign_points(poly, polygon_vector);
@@ -106,16 +104,14 @@ std::vector<point_with_double> GeoJsonReader::get_points()
 	for (auto& feature : root.get_child("features"))
 	{
 		point_with_double point;
-
 		point.population = std::stod(feature.second.get_child("properties.POP_1").data());
-		std::vector<double> coordinates;
+		int i = 0;
 		for (auto& geo_coords : feature.second.get_child("geometry.coordinates"))
 		{
-			double single_coordinate = std::stod(geo_coords.second.data());
-			coordinates.push_back(single_coordinate);
+			if (i == 0) point.lon = std::stod(geo_coords.second.data());
+			else if (i == 1) point.lat = std::stod(geo_coords.second.data());
+			i++;
 		}
-		point.lon = coordinates[0];
-		point.lat = coordinates[1];
 		points.push_back(point);
 	}
 	return points;
