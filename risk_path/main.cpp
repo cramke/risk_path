@@ -6,8 +6,8 @@ void plan_env_pop_rtree()
     // Population Map as RTree from random sample points over raster. Geojson made by QGIS. 
 
     PlanningSetup planner = PlanningSetup();
-    std::array<double, 3> start_point = { 49.86462268679067, 8.657507656252882, 100 };
-    std::array<double, 3> goal_point = { 50.107998827159896, 8.68757388575945, 100 };
+    std::array<double, 3> start_point = { 8.657507656252882, 49.86462268679067, 100 };
+    std::array<double, 3> goal_point = { 8.68757388575945, 50.107998827159896, 100 };
     planner.set_start_goal(start_point, goal_point);
 
     const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/ghs_pop_random_sample_points.geojson";
@@ -26,8 +26,8 @@ void plan_env_pop_rtree()
 void plan_env_1()
 {
     PlanningSetup planner = PlanningSetup();
-    std::array<double, 3> start_point = { 49.86462268679067, 8.657507656252882, 100 };
-    std::array<double, 3> goal_point = { 50.107998827159896, 8.68757388575945, 100 };
+    std::array<double, 3> start_point = { 8.657507656252882, 49.86462268679067, 100 };
+    std::array<double, 3> goal_point = { 8.68757388575945, 50.107998827159896, 100 };
     planner.set_start_goal(start_point, goal_point);
     
     auto pop_map = std::make_shared<PopulationMap>();

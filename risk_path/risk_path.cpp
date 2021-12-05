@@ -54,10 +54,10 @@ void PlanningSetup::set_rtree_objective(const char* filename)
 void PlanningSetup::set_boundaries(std::array<double, 3> lower, std::array<double, 3> higher)
 {
     ob::RealVectorBounds bounds(3);
-    bounds.setLow(0, lower[1]);
-    bounds.setHigh(0, higher[1]);
-    bounds.setLow(1, lower[0]);
-    bounds.setHigh(1,higher[0]);
+    bounds.setLow(0, lower[0]);
+    bounds.setHigh(0, higher[0]);
+    bounds.setLow(1, lower[1]);
+    bounds.setHigh(1, higher[1]);
     bounds.setLow(2, lower[2]);
     bounds.setHigh(2, higher[2]);
     space->setBounds(bounds);

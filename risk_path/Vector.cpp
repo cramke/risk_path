@@ -13,7 +13,7 @@ RTreeBox::RTreeBox(std::vector<polygon> polygons)
 	}	
 }
 
-bool RTreeBox::check_point(double lat, double lon)
+bool RTreeBox::check_point(double lon, double lat)
 {
 	std::vector<value> result;
 	point p(lon, lat);
@@ -81,7 +81,7 @@ RTreePoint::RTreePoint(std::vector<point_with_double> points)
 	}
 }
 
-double RTreePoint::nearest_point_cost(double lat, double lon)
+double RTreePoint::nearest_point_cost(double lon, double lat)
 {
 	point p(lon, lat);
 	std::vector<point_with_double> result;
@@ -91,8 +91,8 @@ double RTreePoint::nearest_point_cost(double lat, double lon)
 
 double RTreePoint::buffered_line_cost(const double* pos1, const double* pos2)
 {
-	point p1(pos1[1], pos1[0]);
-	point p2(pos2[1], pos1[0]);
+	point p1(pos1[0], pos1[1]);
+	point p2(pos2[0], pos1[1]);
 	bg::model::linestring<point> line{ p1, p2 };
 
 	const double buffer_distance = 0.005;
@@ -110,9 +110,9 @@ double RTreePoint::buffered_line_cost(const double* pos1, const double* pos2)
 	std::vector<point_with_double> result;
 
 	rtree.query(bg::index::intersects(buffered_line), std::back_inserter(result));
-	double cost = std::accumulate(result.begin(),
-		result.end(),
-		0.0,
-		[](double sum, const point_with_double& curr) {return sum + curr.population; });
+	double cost = std::accumulate(	result.begin(),
+									result.end(),
+									0.0,
+									[](double sum, const point_with_double& curr) {return sum + curr.population; });
 	return cost;
 }
