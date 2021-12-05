@@ -55,7 +55,6 @@ class GeoJsonReader
 	std::string path;
 	boost::property_tree::ptree root;
 public:
-	GeoJsonReader(std::string);
 	GeoJsonReader(const char*);
 	std::vector<polygon> get_polygons();
 	std::vector<point_with_double> get_points();
