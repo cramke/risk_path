@@ -49,7 +49,8 @@ public:
     void set_validity_checker(const char*);
     void set_objective(std::shared_ptr<PopulationMap> map);
     void set_rtee_objective(std::shared_ptr<RTreePoint> rtree);
-    void set_boundaries();
+    void set_rtree_objective(const char*);
+    void set_boundaries(std::array<double, 3> lower, std::array<double, 3> higher);
     void set_start_goal(std::array<double, 3> start_coords, std::array<double, 3> goal_coords);
     void solve();
 };

@@ -42,15 +42,24 @@ void PlanningSetup::set_rtee_objective(std::shared_ptr<RTreePoint> rtree)
     ss->setOptimizationObjective(population_objective);
 }
 
-void PlanningSetup::set_boundaries()
+void PlanningSetup::set_rtree_objective(const char* filename)
+{
+    GeoJsonReader reader = GeoJsonReader(filename);
+    auto points = reader.get_points();
+    std::shared_ptr<RTreePoint> rtree = std::make_shared<RTreePoint>(points);
+    auto population_objective = std::make_shared<RTreeOptimizationObjective>(si, rtree);
+    ss->setOptimizationObjective(population_objective);
+}
+
+void PlanningSetup::set_boundaries(std::array<double, 3> lower, std::array<double, 3> higher)
 {
     ob::RealVectorBounds bounds(3);
-    bounds.setLow(0, 49);
-    bounds.setHigh(0, 51);
-    bounds.setLow(1, 5.868);
-    bounds.setHigh(1, 9);
-    bounds.setLow(2, 100);
-    bounds.setHigh(2, 100);
+    bounds.setLow(0, lower[1]);
+    bounds.setHigh(0, higher[1]);
+    bounds.setLow(1, lower[0]);
+    bounds.setHigh(1,higher[0]);
+    bounds.setLow(2, lower[2]);
+    bounds.setHigh(2, higher[2]);
     space->setBounds(bounds);
 }
 
@@ -79,7 +88,7 @@ void PlanningSetup::solve()
     double long_segment = space->getLongestValidSegmentLength();
     double long_fraction = space->getLongestValidSegmentFraction();
 
-    const int PLANNING_TIME = 3;
+    const int PLANNING_TIME = 2;
     ob::PlannerStatus solved = ss->solve(PLANNING_TIME);
     if (solved)
     {

@@ -1,6 +1,4 @@
-#pragma once
-#include <iostream>
-#include "risk_path.h"
+#include "main.h"
 
 
 void plan_env_pop_rtree()
@@ -13,15 +11,15 @@ void plan_env_pop_rtree()
     planner.set_start_goal(start_point, goal_point);
 
     const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/ghs_pop_random_sample_points.geojson";
-    GeoJsonReader reader = GeoJsonReader(filename);
-    auto points = reader.get_points();
-    std::shared_ptr<RTreePoint> rtree = std::make_shared<RTreePoint>(points);
-    planner.set_rtee_objective(rtree);
+    planner.set_rtree_objective(filename);
 
     const char* path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/test.geojson";
     planner.set_validity_checker(path);
     
-    planner.set_boundaries();
+    std::array<double, 3> lower = {5.868, 49.0, 100.0};
+    std::array<double, 3> higher = {9.0, 51.0, 100.0};
+    planner.set_boundaries(lower, higher);
+
     planner.solve();
 }
 
@@ -38,7 +36,10 @@ void plan_env_1()
     const char* path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/test.geojson";
     planner.set_validity_checker(path);
 
-    planner.set_boundaries();
+    std::array<double, 3> lower = { 5.868, 49.0, 100.0 };
+    std::array<double, 3> higher = { 9.0, 51.0, 100.0 };
+    planner.set_boundaries(lower, higher);
+
     planner.solve();
 }
 
