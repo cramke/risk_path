@@ -41,6 +41,15 @@ public:
 	double buffered_line_cost(const double* pos1, const double* pos2);
 };
 
+class RTreePoint
+{
+public:
+	bg::index::rtree<point_with_double, bg::index::rstar<16, 4>> rtree;
+	RTreePoint(std::vector<point_with_double> points);
+	double nearest_point_cost(double lat, double lon);
+	double buffered_line_cost(const double* pos1, const double* pos2);
+};
+
 class GeoJsonReader
 {
 	std::string path;
