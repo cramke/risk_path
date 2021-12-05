@@ -25,7 +25,7 @@ ob::Cost CustomOptimizationObjective::motionCost(const ob::State* s1, const ob::
     return ob::Cost(cost_value1 + cost_value2);
 }
 
-RTreeOptimizationObjective::RTreeOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<RTreeBox> rtree_given) : ob::OptimizationObjective(si)
+RTreeOptimizationObjective::RTreeOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<RTreePoint> rtree_given) : ob::OptimizationObjective(si)
 {
     rtree = rtree_given;
 }

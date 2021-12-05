@@ -36,7 +36,7 @@ void PlanningSetup::set_objective(std::shared_ptr<PopulationMap> map)
     ss->setOptimizationObjective(population_objective);
 }
 
-void PlanningSetup::set_rtee_objective(std::shared_ptr<RTreeBox> rtree)
+void PlanningSetup::set_rtee_objective(std::shared_ptr<RTreePoint> rtree)
 {
     auto population_objective = std::make_shared<RTreeOptimizationObjective>(si, rtree);
     ss->setOptimizationObjective(population_objective);
