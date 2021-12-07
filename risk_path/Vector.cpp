@@ -89,6 +89,31 @@ double RTreePoint::nearest_point_cost(double lon, double lat)
 	return result[0].population;
 }
 
+double RTreePoint::buffered_point_cost(const double* pos)
+{
+	point p(pos[0], pos[1]);
+
+	const double buffer_distance = 0.005;
+	const int points_per_circle = 8;
+	boost::geometry::strategy::buffer::distance_symmetric<double> distance_strategy(buffer_distance);
+	boost::geometry::strategy::buffer::join_round join_strategy(points_per_circle);
+	boost::geometry::strategy::buffer::end_round end_strategy(points_per_circle);
+	boost::geometry::strategy::buffer::point_circle circle_strategy(points_per_circle);
+	boost::geometry::strategy::buffer::side_straight side_strategy;
+
+	bg::model::multi_polygon<polygon> buffer;
+	std::vector<point_with_double> result;
+	bg::buffer(p, buffer, distance_strategy, side_strategy,
+		join_strategy, end_strategy, circle_strategy);
+
+	rtree.query(bg::index::intersects(buffer), std::back_inserter(result));
+	double cost = std::accumulate(	result.begin(),
+									result.end(),
+									0.0,
+									[](double sum, const point_with_double& curr) {return sum + curr.population; });
+	return cost;
+}
+
 double RTreePoint::buffered_line_cost(const double* pos1, const double* pos2)
 {
 	point p1(pos1[0], pos1[1]);

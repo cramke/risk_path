@@ -1,6 +1,5 @@
 #include "main.h"
 
-
 void plan_env_pop_rtree()
 {
     // Population Map as RTree from random sample points over raster. Geojson made by QGIS. 
@@ -11,6 +10,7 @@ void plan_env_pop_rtree()
     planner.set_start_goal(start_point, goal_point);
 
     const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/ghs_pop_random_sample_points.geojson";
+    // const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/new.geojson";
     planner.set_rtree_objective(filename);
 
     const char* path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/test.geojson";

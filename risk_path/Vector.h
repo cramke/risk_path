@@ -43,6 +43,7 @@ public:
 	bg::index::rtree<point_with_double, bg::index::rstar<16, 4>> rtree;
 	RTreePoint(std::vector<point_with_double> points);
 	double nearest_point_cost(double lat, double lon);
+	double buffered_point_cost(const double* pos);
 	double buffered_line_cost(const double* pos1, const double* pos2);
 };
 

@@ -9,7 +9,7 @@ ob::Cost CustomOptimizationObjective::stateCost(const ob::State* state) const
     const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
     Coordinates point = Coordinates(pos[0], pos[1], map);
     double cost_value = map->read_population_from_indexes(point.x, point.y);
-    return ob::Cost(cost_value);
+    return ob::Cost(cost_value);        
 }
 
 ob::Cost CustomOptimizationObjective::motionCost(const ob::State* s1, const ob::State* s2) const
@@ -33,7 +33,9 @@ RTreeOptimizationObjective::RTreeOptimizationObjective(ob::SpaceInformationPtr& 
 ob::Cost RTreeOptimizationObjective::stateCost(const ob::State* state) const
 {
     const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-    double state_cost = rtree->nearest_point_cost(pos[0], pos[1]);
+    // double state_cost = rtree->nearest_point_cost(pos[0], pos[1]);
+
+    double state_cost = rtree->buffered_point_cost(pos);
     return ob::Cost(state_cost);
 }
 
