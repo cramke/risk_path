@@ -42,7 +42,7 @@ class PlanningSetup
 {
 public:
     std::shared_ptr<ob::RealVectorStateSpace> space;
-    std::shared_ptr<og::SimpleSetup> ss;
+    std::shared_ptr<og::SimpleSetup> simple_setup;
     ob::SpaceInformationPtr si;
 
     PlanningSetup();
