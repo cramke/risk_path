@@ -4,7 +4,7 @@ CustomOptimizationObjective::CustomOptimizationObjective(ob::SpaceInformationPtr
 {
 }
 
-ob::Cost CustomOptimizationObjective::stateCost(const ob::State* state) const
+ob::Cost CustomOptimizationObjective::stateCost(const ob::State* state) const 
 {
     const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
     Coordinates point = Coordinates(pos[0], pos[1], map);

@@ -44,6 +44,8 @@ public:
 	RTreePoint(std::vector<point_with_double> points);
 	double nearest_point_cost(double lat, double lon);
 	double buffered_point_cost(const double* pos);
+	bg::model::multi_polygon<polygon> buffer_point(point &p);
+	bg::model::multi_polygon<polygon> buffer_line(bg::model::linestring<point> &line);
 	double buffered_line_cost(const double* pos1, const double* pos2);
 };
 
