@@ -9,11 +9,11 @@ void plan_env_pop_rtree()
     std::array<double, 3> goal_point = { 8.68757388575945, 50.107998827159896, 100 };
     planner.set_start_goal(start_point, goal_point);
 
-    const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/ghs_pop_random_sample_points.geojson";
+    const char* filename = "/home/samtal/risk_path/ressources/ghs_pop_random_sample_points.geojson";
     // const char* filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/new.geojson";
     planner.set_rtree_objective(filename);
 
-    const char* path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/test.geojson";
+    const char* path = "/home/samtal/risk_path/ressources/test.geojson";
     planner.set_validity_checker(path);
     
     std::array<double, 3> lower = {5.868, 49.0, 100.0};
@@ -33,7 +33,7 @@ void plan_env_1()
     auto pop_map = std::make_shared<PopulationMap>();
     planner.set_objective(pop_map);
 
-    const char* path = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/data/test.geojson";
+    const char* path = "/home/samtal/risk_path/ressources/test.geojson";
     planner.set_validity_checker(path);
 
     std::array<double, 3> lower = { 5.868, 49.0, 100.0 };
