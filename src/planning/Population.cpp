@@ -14,8 +14,7 @@ PopulationMap::PopulationMap()
         scanline = (float*)CPLMalloc(sizeof(float) * nXSize);
         has_file_loaded = true;
     } else {
-        printf("The dataset failed to open. Maybe check the filename?");
-        throw std::ios_base::failure("File not found or file is empty");
+        throw std::ios_base::failure("File not found or file is empty. The dataset failed to open. Maybe check the filename?");
     }
 }
 
