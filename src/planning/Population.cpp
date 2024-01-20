@@ -6,11 +6,7 @@ PopulationMap::PopulationMap()
     GDALAllRegister();
     dataset = (GDALDataset*)GDALOpen(filename, GA_ReadOnly);
     if (dataset != NULL) {
-        double transformer[6];
-        dataset->GetGeoTransform(transformer);
-        for (int i = 0; i < 6; i++) {
-            transform[i] = transformer[i];
-        }
+        dataset->GetGeoTransform(transform.data());
         check_transform();
         band = dataset->GetRasterBand(1);
         nXSize = band->GetXSize();
