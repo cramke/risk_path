@@ -8,11 +8,9 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
 )
 
+file(GLOB SRCS "*.cpp")
 add_library(planning 
-    "Population.cpp"
-    "CustomOptimizationObjective.cpp"
-    "risk_path.cpp"
-    "Vector.cpp"
+    ${SRCS}
 )
 target_link_libraries(planning
     ${OMPL_LIBRARIES}

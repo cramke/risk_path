@@ -7,6 +7,7 @@
 
 #include "Population.h"
 #include "Vector.h"
+#include "Coordinates.hpp"
 
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
