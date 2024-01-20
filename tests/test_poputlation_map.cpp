@@ -28,10 +28,9 @@ TEST(Coordinates, RandomPoint)
 {
     auto map = std::make_shared<PopulationMap>();
     double delta = 0.0001;
-    Coordinates point = Coordinates(0, 0, map);
+    auto point = Coordinates(0, 0, map);
     double expected_lat = 55.056805555555556;
     double expected_lon = 5.8676388888888891;
-    double actual_lat = point.lat;
     ASSERT_NEAR(expected_lat, point.lat, delta);
     ASSERT_NEAR(expected_lon, point.lon, delta);
 }
@@ -41,7 +40,7 @@ TEST(Coordinates, ExpectZero)
     auto map = std::make_shared<PopulationMap>();
     double lat = 55.056805555555556;
     double lon = 5.8676388888888891;
-    Coordinates point = Coordinates(lat, lon, map);
+    auto point = Coordinates(lat, lon, map);
     int expected_x = 0;
     int expected_y = 0;
     EXPECT_EQ(expected_x, point.x);
@@ -51,7 +50,7 @@ TEST(Coordinates, ExpectZero)
 TEST(PopulationMap, TestMethod_RandomPointReverse)
 {
     auto map = std::make_shared<PopulationMap>();
-    Coordinates point = Coordinates(52.4693, 13.3804, map);
+    auto point = Coordinates(52.4693, 13.3804, map);
     int expected_x = 27046;
     int expected_y = 9315;
     EXPECT_EQ(expected_x, point.x);
@@ -61,14 +60,14 @@ TEST(PopulationMap, TestMethod_RandomPointReverse)
 TEST(PopulationMap, InBounds)
 {
     auto map = std::make_shared<PopulationMap>();
-    Coordinates point = Coordinates(52.3, 8.9, map);
+    auto point = Coordinates(52.3, 8.9, map);
     EXPECT_TRUE(map->check_map_bounds(point.lat, point.lon));
 }
 
 TEST(PopulationMap, OutOfBounds)
 {
     auto map = std::make_shared<PopulationMap>();
-    Coordinates point = Coordinates(23.453, 45.036, map);
+    auto point = Coordinates(23.453, 45.036, map);
     EXPECT_FALSE(map->check_map_bounds(point.lat, point.lon));
 }
 
@@ -76,7 +75,7 @@ TEST(PopulationMap, ReadPopulation)
 {
     auto map = std::make_shared<PopulationMap>();
     double delta = 0.0001;
-    Coordinates point = Coordinates(52.368830, 9.75593335, map);
+    auto point = Coordinates(52.368830, 9.75593335, map);
     double expected_population = 5.97513;
     double population = map->read_population_from_indexes(point.x, point.y);
     ASSERT_NEAR(expected_population, population, delta);
@@ -86,7 +85,7 @@ TEST(PopulationMap, RandomPoint)
 {
     auto map = std::make_shared<PopulationMap>();
     double delta = 0.0001;
-    Coordinates point = Coordinates(27046, 9315, map);
+    auto point = Coordinates(27046, 9315, map);
     double expected_lat = 52.4693;
     double expected_lon = 13.3804;
     ASSERT_NEAR(expected_lat, point.lat, delta);

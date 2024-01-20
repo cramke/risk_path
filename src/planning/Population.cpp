@@ -1,40 +1,31 @@
 #include "Population.h"
 
 
-PopulationMap::PopulationMap() 
+PopulationMap::PopulationMap()
 {
-    filename = "/home/samtal/risk_path/ressources/pop_deu.tif";
     GDALAllRegister();
     dataset = (GDALDataset*)GDALOpen(filename, GA_ReadOnly);
-    if (dataset != NULL) 
-    {
+    if (dataset != NULL) {
+        double transformer[6];
         dataset->GetGeoTransform(transformer);
-        transform_array();
+        for (int i = 0; i < 6; i++) {
+            transform[i] = transformer[i];
+        }
+        check_transform();
         band = dataset->GetRasterBand(1);
         nXSize = band->GetXSize();
         nYSize = band->GetYSize();
         scanline = (float*)CPLMalloc(sizeof(float) * nXSize);
         has_file_loaded = true;
-    } 
-    else 
-    {
+    } else {
         printf("The dataset failed to open. Maybe check the filename?");
-        throw std::runtime_error("File not found or file is empty");
+        throw std::ios_base::failure("File not found or file is empty");
     }
-}
-
-void PopulationMap::transform_array() 
-{
-    for (int i = 0; i < 6; i++) 
-    {
-        transform[i] = transformer[i];
-    }
-    check_transform();
 }
 
 double PopulationMap::read_population_from_indexes(int x, int y) const 
 {
-    band->RasterIO(GF_Read, x, y, 1, 1, scanline, 1, 1, GDT_Float32, 0, 0);
+    auto result = band->RasterIO(GF_Read, x, y, 1, 1, scanline, 1, 1, GDT_Float32, 0, 0);
     return (double)scanline[0];
 }
 
@@ -66,54 +57,38 @@ std::tuple<double, double, double, double> PopulationMap::get_spatial_bounds() c
 
 bool PopulationMap::check_map_bounds(double lat, double lon) const 
 {
-    auto bounds = PopulationMap::get_spatial_bounds();
-    if (    lat > std::get<0>(bounds) &&
-            lat < std::get<1>(bounds) &&
-            lon > std::get<2>(bounds) &&
-            lon < std::get<3>(bounds)) 
-    {
+    auto [min_lat, max_lat, min_lon, max_lon] = PopulationMap::get_spatial_bounds();
+    if (lat < min_lat) {return false;}
+    if (lat > max_lat) {return false;}
+    if (lon < min_lon) {return false;}
+    if (lon > max_lon) {return false;}
         return true;
-    }
-    else 
-    {
-        return false;
-    }
 }
 
 
-Coordinates::Coordinates(int x_given, int y_given, std::shared_ptr<PopulationMap> map_given) 
+Coordinates::Coordinates(int x_given, int y_given, std::shared_ptr<PopulationMap> map_given) :
+    x(x_given), y(y_given), transform(map_given->transform)
 {
-    transform = map_given->transform;
-    x = x_given;
-    y = y_given;
-    std::tuple<double, double> spatial = index_to_spatial_coordinates(x, y);
-    lat = std::get<0>(spatial);
-    lon = std::get<1>(spatial);
+    index_to_spatial_coordinates();
 }
 
-Coordinates::Coordinates(double lat_given, double lon_given, std::shared_ptr<PopulationMap> map_given) 
+Coordinates::Coordinates(double lat_given, double lon_given, std::shared_ptr<PopulationMap> map_given) :
+    lat(lat_given), lon(lon_given), transform(map_given->transform)
 {
-    transform = map_given->transform;
-    lat = lat_given;
-    lon = lon_given;
-    std::tuple<int, int> index = spatial_to_index_coordinates(lat, lon);
-    x = std::get<0>(index);
-    y = std::get<1>(index);
+    spatial_to_index_coordinates();
 }
 
-std::tuple<double, double>  Coordinates::index_to_spatial_coordinates(int xd, int yd) 
+void  Coordinates::index_to_spatial_coordinates() 
 {
     // https://gdal.org/tutorials/geotransforms_tut.html
-    double lon = transform[0] + transform[1] * xd + transform[2] * yd;
-    double lat = transform[3] + transform[4] * xd + transform[5] * yd;
-    return std::make_tuple(lat, lon);
+    lon = transform[0] + transform[1] * x + transform[2] * y;
+    lat = transform[3] + transform[4] * x + transform[5] * y;
 }
 
-std::tuple<int, int> Coordinates::spatial_to_index_coordinates(double lat, double lon) 
+void Coordinates::spatial_to_index_coordinates() 
 {
-    double x = ((lon - transform[0]) - (transform[2] * 0)) / transform[1];
-    double y = ((lat - transform[3]) - (transform[4] * 0)) / transform[5];
-    int x_index = int(std::round(x));
-    int y_index = int(std::round(y));
-    return std::make_tuple(x_index, y_index);
+    double sub_x = ((lon - transform[0]) - (transform[2] * 0)) / transform[1];
+    double sub_y = ((lat - transform[3]) - (transform[4] * 0)) / transform[5];
+    x = int(std::round(sub_x));
+    y = int(std::round(sub_y));
 }

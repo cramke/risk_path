@@ -1,8 +1,9 @@
 #include "risk_path.h"
 
-ProjectValidityChecker::ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<RTreeBox> rtree_ptr) : ob::StateValidityChecker(si)
+ProjectValidityChecker::ProjectValidityChecker(const ob::SpaceInformationPtr& si, std::shared_ptr<RTreeBox> rtree_ptr) : 
+    ob::StateValidityChecker(si),
+    rtree(rtree_ptr)
 {
-    rtree = rtree_ptr;
 }
 
 bool ProjectValidityChecker::isValid(const ob::State* state) const
@@ -26,9 +27,9 @@ PlanningSetup::PlanningSetup()
 
 void PlanningSetup::set_validity_checker(const char* path)
 {
-    GeoJsonReader reader = GeoJsonReader(path);
+    auto reader = GeoJsonReader(path);
     auto polys = reader.get_polygons();
-    std::shared_ptr<RTreeBox> rtree = std::make_shared<RTreeBox>(polys);
+    auto rtree = std::make_shared<RTreeBox>(polys);
     simple_setup->setStateValidityChecker(std::make_shared<ProjectValidityChecker>(si, rtree));
 }
 
@@ -46,9 +47,9 @@ void PlanningSetup::set_rtee_objective(std::shared_ptr<RTreePoint> rtree)
 
 void PlanningSetup::set_rtree_objective(const char* filename)
 {
-    GeoJsonReader reader = GeoJsonReader(filename);
+    auto reader = GeoJsonReader(filename);
     auto points = reader.get_points();
-    std::shared_ptr<RTreePoint> rtree = std::make_shared<RTreePoint>(points);
+    auto rtree = std::make_shared<RTreePoint>(points);
     auto population_objective = std::make_shared<RTreeOptimizationObjective>(si, rtree);
     simple_setup->setOptimizationObjective(population_objective);
 }

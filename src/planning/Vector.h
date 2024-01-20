@@ -16,14 +16,15 @@ namespace bg = boost::geometry;
 
 BOOST_GEOMETRY_REGISTER_C_ARRAY_CS(cs::cartesian)
 
-typedef bg::model::d2::point_xy<double> point;
-typedef bg::model::polygon<point> polygon;
-typedef bg::model::box<point> box;
-typedef std::pair<box, unsigned> value; 
+using point = bg::model::d2::point_xy<double>;
+using polygon = bg::model::polygon<point>;
+using box = bg::model::box<point>;
+using value = std::pair<box, unsigned>; 
 
 struct point_with_double
 {
-	double lon, lat;
+	double lon;
+	double lat;
 	double population;
 };
 
@@ -33,20 +34,20 @@ class RTreeBox
 {
 public:
 	bg::index::rtree<value, bg::index::rstar<16, 4>> rtree;
-	explicit RTreeBox(std::vector<polygon> polygons);
-	bool check_point(double lat, double lon);
+	explicit RTreeBox(const std::vector<polygon> & polygons);
+	bool check_point(double lat, double lon) const;
 };
 
 class RTreePoint
 {
 public:
 	bg::index::rtree<point_with_double, bg::index::rstar<16, 4>> rtree;
-	explicit RTreePoint(std::vector<point_with_double> points);
-	double nearest_point_cost(double lat, double lon);
-	double buffered_point_cost(const double* pos);
-	bg::model::multi_polygon<polygon> buffer_point(point &p);
-	bg::model::multi_polygon<polygon> buffer_line(bg::model::linestring<point> &line);
-	double buffered_line_cost(const double* pos1, const double* pos2);
+	explicit RTreePoint(const std::vector<point_with_double> & points);
+	double nearest_point_cost(double lat, double lon) const;
+	double buffered_point_cost(const double* pos) const;
+	bg::model::multi_polygon<polygon> buffer_point(const point &p) const;
+	bg::model::multi_polygon<polygon> buffer_line(const bg::model::linestring<point> &line) const;
+	double buffered_line_cost(const double* pos1, const double* pos2) const;
 };
 
 class GeoJsonReader

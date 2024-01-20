@@ -25,16 +25,17 @@ ob::Cost CustomOptimizationObjective::motionCost(const ob::State* s1, const ob::
     return ob::Cost(cost_value1 + cost_value2);
 }
 
-RTreeOptimizationObjective::RTreeOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<RTreePoint> rtree_given) : ob::OptimizationObjective(si)
+RTreeOptimizationObjective::RTreeOptimizationObjective(ob::SpaceInformationPtr& si, std::shared_ptr<RTreePoint> rtree_given) : 
+    ob::OptimizationObjective(si),
+    rtree(rtree_given)
 {
-    rtree = rtree_given;
 }
 
 ob::Cost RTreeOptimizationObjective::stateCost(const ob::State* state) const
 {
     const double* pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-    // double state_cost = rtree->nearest_point_cost(pos[0], pos[1]);
-
+    
+    // use rtree->nearest_point_cost(pos[0], pos[1]) as alternative cost function for the RTree. Less precise but faster.
     double state_cost = rtree->buffered_point_cost(pos);
     return ob::Cost(state_cost);
 }
