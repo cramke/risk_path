@@ -3,7 +3,7 @@
 
 PopulationMap::PopulationMap() 
 {
-    filename = "C:/Users/carst/OneDrive/Projekte/risk-path/risk_path/maps/pop_deu.tif";
+    filename = "/home/samtal/risk_path/ressources/pop_deu.tif";
     GDALAllRegister();
     dataset = (GDALDataset*)GDALOpen(filename, GA_ReadOnly);
     if (dataset != NULL) 
