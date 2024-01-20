@@ -7,16 +7,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(ompl REQUIRED)
 find_package(GDAL REQUIRED)
 
+add_subdirectory(src/planning)
 include_directories(${OMPL_INCLUDE_DIRS} 
     ${GDAL_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-file(GLOB SOURCES "src/*.cpp")
+add_executable(risk_path src/main.cpp)
+target_include_directories(risk_path PUBLIC
+                          "${PROJECT_BINARY_DIR}"
+                          "${PROJECT_SOURCE_DIR}/planning"
+                          )
 
-add_executable(risk_path src/main.cpp ${SOURCES})
-target_include_directories(risk_path PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(risk_path ${OMPL_LIBRARIES} ${GDAL_LIBRARIES})
+target_link_libraries(risk_path ${OMPL_LIBRARIES} ${GDAL_LIBRARIES} planning)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
@@ -34,17 +37,17 @@ FetchContent_MakeAvailable(googletest)
 
 file(GLOB TESTS "tests/*.cpp")
 add_executable(
-    hello_test
+    test_risk_path
     ${TESTS}
-    ${SOURCES}
 )
 
 target_link_libraries(
-    hello_test
+    test_risk_path
     GTest::gtest_main
     ${OMPL_LIBRARIES}
     ${GDAL_LIBRARIES}
+    planning
 )
 
 include(GoogleTest)
-gtest_discover_tests(hello_test)
+gtest_discover_tests(test_risk_path)

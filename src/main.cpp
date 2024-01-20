@@ -53,6 +53,6 @@ void plan_env_1()
 int main(int /*argc*/, char** /*argv*/)
 {
     std::cout << "Hello, from risk_path!\n";
-    plan_env_1();
-    // plan_env_pop_rtree();
+    // plan_env_1();
+    plan_env_pop_rtree();
 }
