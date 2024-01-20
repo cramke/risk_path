@@ -33,7 +33,7 @@ class RTreeBox
 {
 public:
 	bg::index::rtree<value, bg::index::rstar<16, 4>> rtree;
-	RTreeBox(std::vector<polygon> polygons);
+	explicit RTreeBox(std::vector<polygon> polygons);
 	bool check_point(double lat, double lon);
 };
 
@@ -41,7 +41,7 @@ class RTreePoint
 {
 public:
 	bg::index::rtree<point_with_double, bg::index::rstar<16, 4>> rtree;
-	RTreePoint(std::vector<point_with_double> points);
+	explicit RTreePoint(std::vector<point_with_double> points);
 	double nearest_point_cost(double lat, double lon);
 	double buffered_point_cost(const double* pos);
 	bg::model::multi_polygon<polygon> buffer_point(point &p);
@@ -54,7 +54,7 @@ class GeoJsonReader
 	std::string path;
 	boost::property_tree::ptree root;
 public:
-	GeoJsonReader(const char*);
+	explicit GeoJsonReader(const char*);
 	std::vector<polygon> get_polygons();
 	std::vector<point_with_double> get_points();
 };

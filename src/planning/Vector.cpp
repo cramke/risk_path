@@ -34,17 +34,17 @@ std::vector<polygon> GeoJsonReader::get_polygons()
 	for (auto& feature : root.get_child("features"))
 	{
 		std::vector<point> polygon_points;
-		for (auto& fourth : feature.second.get_child("geometry.coordinates"))
+		for (auto& coordinate : feature.second.get_child("geometry.coordinates"))
 		{
-			for (auto& third : fourth.second)
+			for (auto& third : coordinate.second)
 			{
-					std::vector<double> point_vector;
-					for (auto& cell : third.second)
-					{
-						point_vector.push_back(std::stod(cell.second.data()));
-					}
-					point p1(point_vector[0], point_vector[1]);
-					polygon_points.push_back(p1);
+				assert(third.first.empty()); // array elements have no names
+				auto size = std::distance(third.second.begin(), third.second.end());
+				assert(size == 2);
+				double x = std::stod(third.second.front().second.data());
+				double y = std::stod(third.second.back().second.data());
+				point p1(x, y);
+				polygon_points.push_back(p1);
 			}
 		}
 		polygon poly;
