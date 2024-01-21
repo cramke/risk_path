@@ -1,4 +1,5 @@
 # Resources
+The ressources are needed as test ressources. Without them the unittest will fail. 
 
 ## POP DEU
 Is a population density geo tif for germany. 
