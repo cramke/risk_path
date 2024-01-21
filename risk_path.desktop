@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=RiskPath
+Exec=risk_path
+Comment=Visualize risk path 
+Terminal=false
+Categories=Development;
+Name[en_US]=RiskPath

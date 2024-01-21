@@ -1,0 +1,34 @@
+name: risk-path
+base: core22
+summary: The risk path planner you deserve
+version: 'v0.0.1'
+description: |
+  QT5 based application using OMPL, GDAL, and Boost to plan risk-aware paths. 
+
+issues: https://github.com/cramke/risk_path/issues
+source-code: https://github.com/cramke/risk_path
+
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: devmode # use 'strict' once you have the right plugs and slots
+
+apps:
+  risk-path:
+    command: usr/bin/risk_path
+    #plugs: [network, network-bind, home, removable-media]
+    #extensions: [kde-neon]
+
+parts:
+  risk-path:
+    plugin: cmake
+    source: .
+    cmake-parameters:
+      - -DCMAKE_BUILD_TYPE=Release
+      #- -DCMAKE_INSTALL_PREFIX=/usr
+      - "-DCMAKE_PREFIX_PATH=$(echo $SNAPCRAFT_CMAKE_ARGS | awk -F= '{printf(\"%s/usr/lib/$CRAFT_ARCH_TRIPLET/cmake/Qt5\", $2)}')"
+    build-packages:
+      - g++
+      - libompl-dev 
+      - libgdal-dev 
+      - libboost-all-dev
+    stage-packages:
+      - libompl-dev

@@ -25,6 +25,10 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
+install(TARGETS risk_path
+        DESTINATION usr/bin
+)
+
 ## UnitTests
 enable_testing() #to  discover tests in test explorer 
 
