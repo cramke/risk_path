@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "src/planning/risk_path.h"
+#include "risk_path.h"
 
 TEST(UnitTest_CoordinateTransformations, TestsEverything)
 {
