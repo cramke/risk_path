@@ -8,14 +8,16 @@
 // Forward declaration because of circular dependency of Coordinates.hpp and Population.h
 class Coordinates;
 
-class PopulationMap {
+class PopulationMap
+{
 private:
-    const char* filename = "/home/samtal/risk_path/ressources/pop_deu.tif";
-    GDALDataset* dataset;
-    GDALRasterBand* band;
-    float* scanline;
+    const char *filename = "/home/samtal/risk_path/ressources/pop_deu.tif";
+    GDALDataset *dataset;
+    GDALRasterBand *band;
+    float *scanline;
     int nXSize;
     int nYSize;
+
 public:
     bool has_file_loaded;
     std::array<double, 6> transform;
@@ -24,7 +26,7 @@ public:
     void close();
     bool check_transform();
     double read_population_from_indexes(int x, int y) const;
-    double read_population_from_coooordinates(const Coordinates & coords) const;
+    double read_population_from_coooordinates(const Coordinates &coords) const;
     std::tuple<double, double, double, double> get_spatial_bounds() const;
     bool check_map_bounds(double lat, double lon) const;
 };
