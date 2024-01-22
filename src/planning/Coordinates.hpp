@@ -6,8 +6,8 @@
 class Coordinates
 {
 public:
-    Coordinates(int x, int y, std::array<double, 6> transform);
-    Coordinates(double lat_given, double lon_given, std::array<double, 6> transform);
+    Coordinates(int x, int y, std::array<double, 6> &transform);
+    Coordinates(double lat_given, double lon_given, std::array<double, 6> &transform);
 
     void index_to_spatial_coordinates();
     void spatial_to_index_coordinates();
