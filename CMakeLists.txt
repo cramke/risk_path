@@ -4,13 +4,14 @@ project(risk_path VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+## Find and include dependencies
 find_package(ompl REQUIRED)
 find_package(GDAL REQUIRED)
 find_package(Boost 1.74 REQUIRED )
 
 set(PLANNING_SRCS
     "src/planning/Coordinates.cpp"
-    "src/planning/CustomOptimizationObjective.cpp"
+    "src/planning/src/CustomOptimizationObjective.cpp"
     "src/planning/Population.cpp"
     "src/planning/risk_path.cpp"
     "src/planning/Vector.cpp"
@@ -18,28 +19,29 @@ set(PLANNING_SRCS
 set(PLANNING_HEADERS
     "src/planning/Coordinates.hpp"
     "src/planning/Population.h"
-    "src/planning/risk_path.h"
+    "src/planning/include/risk_path.h"
     "src/planning/Vector.h"
 )
-
 include_directories(${OMPL_INCLUDE_DIRS} 
     ${GDAL_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${Boost_INCLUDE_DIRS}
     src/planning
+    src/planning/include
 )
 
+## Build planning library
 add_library(planning SHARED
     ${PLANNING_SRCS}
     ${PLANNING_HEADERS}
 )
-
 target_link_libraries(planning
     ${OMPL_LIBRARIES}
     ${GDAL_LIBRARIES}
     ${Boost_LIBRARIES}
 )  
 
+## Build main executable
 add_executable(risk_path src/main.cpp)
 target_link_libraries(risk_path ${OMPL_LIBRARIES} ${GDAL_LIBRARIES} planning)
 
