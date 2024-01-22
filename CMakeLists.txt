@@ -10,16 +10,16 @@ find_package(GDAL REQUIRED)
 find_package(Boost 1.74 REQUIRED )
 
 set(PLANNING_SRCS
-    "src/planning/Coordinates.cpp"
     "src/planning/src/CustomOptimizationObjective.cpp"
+    "src/planning/Coordinates.cpp"
     "src/planning/Population.cpp"
     "src/planning/risk_path.cpp"
     "src/planning/Vector.cpp"
 )
 set(PLANNING_HEADERS
+    "src/planning/include/risk_path.h"
     "src/planning/Coordinates.hpp"
     "src/planning/Population.h"
-    "src/planning/include/risk_path.h"
     "src/planning/Vector.h"
 )
 include_directories(${OMPL_INCLUDE_DIRS} 
