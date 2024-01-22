@@ -11,8 +11,8 @@ ob::Cost CustomOptimizationObjective::stateCost(
     const ob::State *state) const
 {
     const double *pos = state->as<ob::RealVectorStateSpace::StateType>()->values;
-    Coordinates point = Coordinates(pos[0], pos[1], map);
-    double cost_value = map->read_population_from_indexes(point.x, point.y);
+    Coordinates point = Coordinates(pos[0], pos[1], map->transform);
+    double cost_value = map->read_population_from_indexes(point.getX(), point.getY());
     return ob::Cost(cost_value);
 }
 
@@ -20,12 +20,12 @@ ob::Cost CustomOptimizationObjective::motionCost(
     const ob::State *s1, const ob::State *s2) const
 {
     const double *pos = s1->as<ob::RealVectorStateSpace::StateType>()->values;
-    Coordinates point1 = Coordinates(pos[0], pos[1], map);
-    double cost_value1 = map->read_population_from_indexes(point1.x, point1.y);
+    Coordinates point1 = Coordinates(pos[0], pos[1], map->transform);
+    double cost_value1 = map->read_population_from_indexes(point1.getX(), point1.getY());
 
     const double *pos2 = s2->as<ob::RealVectorStateSpace::StateType>()->values;
-    Coordinates point2 = Coordinates(pos2[0], pos[1], map);
-    double cost_value2 = map->read_population_from_indexes(point2.x, point2.y);
+    Coordinates point2 = Coordinates(pos2[0], pos[1], map->transform);
+    double cost_value2 = map->read_population_from_indexes(point2.getX(), point2.getY());
 
     return ob::Cost(cost_value1 + cost_value2);
 }

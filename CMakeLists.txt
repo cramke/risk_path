@@ -59,10 +59,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-file(GLOB TESTS "tests/*.cpp")
+set(TEST_SOURCES
+    "tests/testCoordinates.cpp"
+    "tests/testPopulationMap.cpp"
+)
 add_executable(
     test_risk_path
-    ${TESTS}
+    ${TEST_SOURCES}
 )
 
 target_link_libraries(

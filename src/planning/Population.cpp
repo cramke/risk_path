@@ -28,7 +28,7 @@ double PopulationMap::read_population_from_indexes(int x, int y) const
 
 double PopulationMap::read_population_from_coooordinates(const Coordinates &coords) const
 {
-    return read_population_from_indexes(coords.x, coords.y);
+    return read_population_from_indexes(coords.getX(), coords.getY());
 }
 
 void PopulationMap::close()
